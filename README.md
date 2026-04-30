@@ -4,14 +4,14 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.8+-ee4c2c.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## 📖 项目简介 (Introduction)
+## 项目简介 (Introduction)
 
 病理图像分析是临床诊断的基础，而精准的细胞计数是其核心任务。本项目旨在解决病理图像中细胞形态极不规则、密集堆叠重叠、以及不同实验室染色工艺差异导致的视觉域偏移等挑战。
 
 基于真实公开的病理图像数据集，本项目实现了多种先进的细胞计数与定位估计方法，包括密度图回归、点监督定位匹配以及实例分割，并对模型在复杂病理环境下的高效性与精准性进行了综合评估与改进。
 
 
-## 🎯 项目目标 (Objectives)
+## 项目目标 (Objectives)
 
 1.  **多方法复现与对比**：在三个公开数据集上复现并对比至少三种不同类型的细胞计数方法：
     *   **密度图回归 (Density Map Regression)**: 如 Steerer [4]
@@ -23,7 +23,7 @@
     *   **效率指标**：模型参数量、计算量 (FLOPs)、推理时间
 3.  **模型改进与可视化**：基于综合效果最好的模型，针对细胞形态不规则、密集堆叠导致边界粘连等挑战进行改进，并输出可视化的预测位置/密度分布（散点图/热力图）。
 
-## 📊 数据集 (Datasets)
+## 数据集 (Datasets)
 
 本项目使用以下三个公开病理细胞切片数据集：
 
@@ -33,7 +33,7 @@
 | **CoNIC** | Colon Nuclei Identification and Counting | 结肠核识别和计数挑战赛数据，包含极其复杂的细胞形态和多类别细胞标签。 | [2] |
 | **MoNuSeg** | Multi-organ Nucleus Segmentation | 多器官细胞核分割与计数，涵盖多种器官的不同组织形态，染色差异极大。 | [3] |
 
-## 🛠️ 方法 (Methods)
+## 方法 (Methods)
 
 本项目考虑实现以下核心算法（下为举例）：
 
@@ -48,6 +48,14 @@
 ### 3. PET (Point-query Quadtree)
 基于点查询四叉树的人群计数、定位方法，适用于密集细胞场景。
 *   **Reference**: Liu et al., ICCV 2023 [5]
+
+## 参考文献 (references)
+[1] Huang, Z., et al. (2020). Bc A large-scale dataset and benchmark for cell detection and counting. MICCAI.
+[2] Graham, S., et al. (2024). CoNIC Challenge: Pushing the frontiers of nuclear detection, segmentation, classification and counting. Medical Image Analysis.
+[3] Kumar, N., et al. (2019). A multi-organ nucleus segmentation challenge. IEEE TMI.
+[4] Graham, S., et al. (2019). HoVer-Net: Simultaneous segmentation and classification of nuclei in multi-tissue histology images. Medical Image Analysis.
+[5] Liu, C., et al. (2023). Point-Query Quadtree for Crowd Counting, Localization, and More. ICCV.
+[6] Han, T., et al. (2023). STEERER: Resolving scale variations for counting and localization via selective inheritance learning. ICCV.
 
 ## 快速开始 (Quick Start)
 
