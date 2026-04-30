@@ -4,7 +4,7 @@
 echo "🚀 开始创建项目框架..."
 
 # 创建目录结构
-mkdir -p configs datasets models utils train eval logs/checkpoints logs/tensorboard_logs results/predictions results/visualizations docs
+mkdir -p configs datasets models utils train eval checkpoints logs/tensorboard_logs results/predictions results/visualizations docs
 
 # 创建 __init__.py 文件
 touch configs/__init__.py datasets/__init__.py models/__init__.py utils/__init__.py train/__init__.py eval/__init__.py
