@@ -33,6 +33,70 @@
 | **CoNIC** | Colon Nuclei Identification and Counting | 结肠核识别和计数挑战赛数据，包含极其复杂的细胞形态和多类别细胞标签。 | [2] |
 | **MoNuSeg** | Multi-organ Nucleus Segmentation | 多器官细胞核分割与计数，涵盖多种器官的不同组织形态，染色差异极大。 | [3] |
 
+## 项目结构 (project structure)
+
+Pathology-Cell-Counting/
+├── README.md                    # 项目说明文档（最重要！）
+├── requirements.txt             # Python依赖包列表
+├── environment.yml             # Conda环境配置（可选）
+├── .gitignore                  # Git忽略文件配置
+├── LICENSE                     # 开源许可证（MIT/Apache 2.0）
+│
+├── configs/                    # 配置文件目录
+│   ├── config.py              # 主配置文件（路径、超参数等）
+│   ├── dataset_config.py      # 数据集配置
+│   └── model_config.py        # 模型配置
+│
+├── datasets/                   # 数据集相关
+│   ├── __init__.py
+│   ├── bcdata_dataset.py      # BCData数据集加载器
+│   ├── conic_dataset.py       # CoNIC数据集加载器
+│   ├── monuseg_dataset.py     # MoNuSeg数据集加载器
+│   └── transforms.py          # 数据增强和预处理
+│
+├── models/                     # 模型定义
+│   ├── __init__.py
+│   ├── hovernet.py            # HoVer-Net实现
+│   ├── steerer.py             # STEERER实现
+│   ├── pet.py                 # PET实现
+│   ├── density_map_net.py     # 密度图回归方法
+│   └── losses.py              # 损失函数定义
+│
+├── utils/                      # 工具函数
+│   ├── __init__.py
+│   ├── metrics.py             # 评估指标（MAE, MSE, Precision等）
+│   ├── visualization.py       # 可视化函数
+│   ├── logger.py              # 日志记录
+│   └── misc.py                # 其他辅助函数
+│
+├── train/                      # 训练相关
+│   ├── train.py               # 主训练脚本
+│   ├── trainer.py             # Trainer类
+│   └── train_scheduler.py     # 学习率调度
+│
+├── eval/                       # 测试/评估
+│   ├── evaluate.py            # 评估脚本
+│   └── test.py                # 测试脚本
+│
+├── logs/                       # 训练日志（.gitignore忽略）
+│   ├── train_log.txt
+│   └── tensorboard_logs/
+│
+├── checkpoints/                # 模型权重（.gitignore忽略）
+│   ├── hovernet_best.pth
+│   ├── steerer_best.pth
+│   └── pet_best.pth
+│
+├── results/                    # 实验结果（.gitignore忽略）
+│   ├── predictions/
+│   ├── visualizations/
+│   └── metrics_summary.json
+│
+└── docs/                       # 文档
+    ├── dataset_intro.md       # 数据集介绍
+    ├── methods.md             # 方法说明
+    └── progress_report.md     # 进度报告
+
 ## 方法 (Methods)
 
 本项目考虑实现以下核心算法（下为举例）：
