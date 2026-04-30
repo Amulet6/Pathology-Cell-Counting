@@ -33,7 +33,7 @@
 | **CoNIC** | Colon Nuclei Identification and Counting | 结肠核识别和计数挑战赛数据，包含极其复杂的细胞形态和多类别细胞标签。 | [2] |
 | **MoNuSeg** | Multi-organ Nucleus Segmentation | 多器官细胞核分割与计数，涵盖多种器官的不同组织形态，染色差异极大。 | [3] |
 
-## 项目结构 (project structure)
+## 项目结构 (project structure)（下为推荐示例）
 
 <details>
 <summary>点击展开项目结构</summary>
@@ -101,6 +101,7 @@ Pathology-Cell-Counting/
     ├── methods.md             # 方法说明
     └── progress_report.md     # 进度报告
 
+```  
 </details>
 
 ## 方法 (Methods)
