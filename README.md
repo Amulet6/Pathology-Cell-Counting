@@ -37,7 +37,8 @@
 
 <details>
 <summary>点击展开项目结构</summary>
-```bash
+   
+```
 Pathology-Cell-Counting/
 ├── README.md                    # 项目说明文档（最重要！）
 ├── requirements.txt             # Python依赖包列表
@@ -99,7 +100,7 @@ Pathology-Cell-Counting/
     ├── dataset_intro.md       # 数据集介绍
     ├── methods.md             # 方法说明
     └── progress_report.md     # 进度报告
-</details>details>
+</details>
 
 ## 方法 (Methods)
 
