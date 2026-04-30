@@ -35,7 +35,7 @@
 
 ## 🛠️ 方法 (Methods)
 
-本项目实现了以下核心算法（下为举例）：
+本项目考虑实现以下核心算法（下为举例）：
 
 ### 1. HoVer-Net (Instance Segmentation)
 同时实现细胞核的分割与分类。通过水平与垂直距离图（Horizontal and Vertical maps）解决实例粘连问题。
