@@ -51,10 +51,15 @@
 
 ## 参考文献 (references)
 [1] Huang, Z., et al. (2020). Bc A large-scale dataset and benchmark for cell detection and counting. MICCAI.
+
 [2] Graham, S., et al. (2024). CoNIC Challenge: Pushing the frontiers of nuclear detection, segmentation, classification and counting. Medical Image Analysis.
+
 [3] Kumar, N., et al. (2019). A multi-organ nucleus segmentation challenge. IEEE TMI.
+
 [4] Graham, S., et al. (2019). HoVer-Net: Simultaneous segmentation and classification of nuclei in multi-tissue histology images. Medical Image Analysis.
+
 [5] Liu, C., et al. (2023). Point-Query Quadtree for Crowd Counting, Localization, and More. ICCV.
+
 [6] Han, T., et al. (2023). STEERER: Resolving scale variations for counting and localization via selective inheritance learning. ICCV.
 
 ## 快速开始 (Quick Start)
