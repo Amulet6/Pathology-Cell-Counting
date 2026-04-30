@@ -35,6 +35,9 @@
 
 ## 项目结构 (project structure)
 
+<details>
+<summary>点击展开项目结构</summary>
+```
 Pathology-Cell-Counting/
 ├── README.md                    # 项目说明文档（最重要！）
 ├── requirements.txt             # Python依赖包列表
