@@ -51,6 +51,11 @@ Pathology-Cell-Counting/
 │   ├── dataset_config.py      # 数据集配置
 │   └── model_config.py        # 模型配置
 │
+├── data/                           # 存放数据集（不上传 Git）
+│   ├── BCData/
+│   ├── CoNIC/
+│   └── MoNuSeg/
+│
 ├── datasets/                   # 数据集相关
 │   ├── __init__.py
 │   ├── bcdata_dataset.py      # BCData数据集加载器
