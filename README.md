@@ -46,55 +46,43 @@ Pathology-Cell-Counting/
 ├── .gitignore                  # Git忽略文件配置
 ├── LICENSE                     # 开源许可证（MIT/Apache 2.0）
 │
-├── configs/                    # 配置文件目录
-│   ├── config.py              # 主配置文件（路径、超参数等）
-│   ├── dataset_config.py      # 数据集配置
-│   └── model_config.py        # 模型配置
 │
-├── data/                           # 存放数据集（不上传 Git）
-│   ├── BCData/
-│   ├── CoNIC/
-│   └── MoNuSeg/
-│
-├── datasets/                   # 数据集相关
-│   ├── __init__.py
-│   ├── bcdata_dataset.py      # BCData数据集加载器
-│   ├── conic_dataset.py       # CoNIC数据集加载器
-│   ├── monuseg_dataset.py     # MoNuSeg数据集加载器
-│   └── transforms.py          # 数据增强和预处理
-│
-├── models/                     # 模型定义
-│   ├── __init__.py
-│   ├── hovernet.py            # HoVer-Net实现
-│   ├── steerer.py             # STEERER实现
-│   ├── pet.py                 # PET实现
-│   ├── density_map_net.py     # 密度图回归方法
-│   └── losses.py              # 损失函数定义
-│
-├── utils/                      # 工具函数
-│   ├── __init__.py
-│   ├── metrics.py             # 评估指标（MAE, MSE, Precision等）
-│   ├── visualization.py       # 可视化函数
-│   ├── logger.py              # 日志记录
-│   └── misc.py                # 其他辅助函数
-│
-├── train/                      # 训练相关
-│   ├── train.py               # 主训练脚本
-│   ├── trainer.py             # Trainer类
-│   └── train_scheduler.py     # 学习率调度
-│
-├── eval/                       # 测试/评估
-│   ├── evaluate.py            # 评估脚本
-│   └── test.py                # 测试脚本
-│
+├── baselines/
+│   └── hovernet/  #其他基线同理
+│       ├── official/                 # 官方代码（.gitignore忽略）
+│       ├── src/                     # 自己写的封装、预处理、训练、评估
+│       │   ├── data/
+│       │   │   ├── download.py
+│       │   │   ├── preprocess.py
+│       │   │   ├── build_index.py
+│       │   │   └── split_dataset.py
+│       │   ├── datasets/
+│       │   │   ├── bcdata.py
+│       │   │   ├── conic.py
+│       │   │   └── monuseg.py
+│       │   ├── configs/
+│       │   │   ├── bcdata.yaml
+│       │   │   ├── conic.yaml
+│       │   │   └── monuseg.yaml
+│       │   ├── train.py
+│       │   ├── infer.py
+│       │   ├── evaluate.py
+│       │   └── utils.py
+│       └── README.md
+├── data/
+│   ├── raw/
+│   │   ├── BCData/
+│   │   ├── CoNIC/
+│   │   └── MoNuSeg/
+│   ├── processed/
+│       ├── BCData/
+│       ├── CoNIC/
+│       └── MoNuSeg/
+|
 ├── logs/                       # 训练日志（.gitignore忽略）
 │   ├── train_log.txt
 │   └── tensorboard_logs/
 │
-├── checkpoints/                # 模型权重（.gitignore忽略）
-│   ├── hovernet_best.pth
-│   ├── steerer_best.pth
-│   └── pet_best.pth
 │
 ├── results/                    # 实验结果（.gitignore忽略）
 │   ├── predictions/
@@ -104,7 +92,8 @@ Pathology-Cell-Counting/
 └── docs/                       # 文档
     ├── dataset_intro.md       # 数据集介绍
     ├── methods.md             # 方法说明
-    └── progress_report.md     # 进度报告
+    └── progress_report.md     # 进度报告   
+  
 
 ```  
 </details>
