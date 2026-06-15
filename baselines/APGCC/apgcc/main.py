@@ -54,11 +54,14 @@ def main():
         torch.cuda.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
 
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.enabled = False
-        torch.use_deterministic_algorithms(True, warn_only=True)
-        os.environ['CUBLAS_WORKSPACE_CONFIG'] = ':16:8'
+        # Keep RNG seeded (reproducible data split / shuffle / init / aug),
+        # but let cuDNN run at full speed. The old fully-deterministic mode set
+        # cudnn.enabled=False, which forced slow native conv kernels and made the
+        # VGG16-bn encoder ~3-4x slower. We trade bit-exact determinism for speed.
+        torch.backends.cudnn.deterministic = False
+        torch.backends.cudnn.benchmark = True   # autotune best conv algo (input sizes are fixed)
+        torch.backends.cudnn.enabled = True
+        torch.use_deterministic_algorithms(False)
         os.environ['PYTHONHASHSEED'] = str(seed)
 
     # Function
@@ -152,8 +155,9 @@ def test(cfg):
     logger.info("##############################################################")
     logger.info('Eval Log %s' % time.strftime("%c"))
 
-    # Define the dataset.
-    train_dl, val_dl = build_dataset(cfg=cfg)
+    # Define the dataset. Final reporting always uses test.list (even when training
+    # selected best.pth on val.list via DATASETS.EVAL_LIST).
+    train_dl, val_dl = build_dataset(cfg=cfg, eval_list='test.list')
     torch.multiprocessing.set_sharing_strategy('file_system')  # avoid limitation of number of open files.
 
     # Building the Model & Optimizer 

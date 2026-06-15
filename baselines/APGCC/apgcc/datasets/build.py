@@ -16,7 +16,11 @@ class DeNormalize(object):
             t.mul_(s).add_(m)
         return tensor
 
-def loading_data(cfg, ):
+def loading_data(cfg, eval_list=None):
+    # eval_list: list used for the val_dl (train=False). Defaults to cfg.DATASETS.EVAL_LIST
+    # (which itself defaults to 'test.list'). test() passes 'test.list' explicitly.
+    if eval_list is None:
+        eval_list = getattr(cfg.DATASETS, 'EVAL_LIST', 'test.list')
     #############################################################################
     # SHHA_set: getitem=[img: images, target:{'point', 'image_id', 'label', 'noise_point'}]
     # train_dl: tuple((imgs, points))
@@ -40,7 +44,7 @@ def loading_data(cfg, ):
                                    collate_fn=collate_fn_crowd, num_workers=cfg.DATALOADER.NUM_WORKERS)
 
     # create the validation dataset
-    val_set = ImageDataset(cfg.DATASETS.DATA_ROOT, train=False, transform=transform, aug_dict=cfg.DATALOADER)
+    val_set = ImageDataset(cfg.DATASETS.DATA_ROOT, train=False, transform=transform, aug_dict=cfg.DATALOADER, eval_list=eval_list)
     sampler_val = torch.utils.data.SequentialSampler(val_set)
     data_loader_val = DataLoader(val_set, 1, sampler=sampler_val,
                                  drop_last=False, collate_fn=collate_fn_crowd, 
@@ -50,7 +54,7 @@ def loading_data(cfg, ):
     print("# Dataset: ", cfg.DATASETS.DATASET)
     print("# Data_rt:", cfg.DATASETS.DATA_ROOT)
     print("# Train  :", train_set.nSamples)
-    print("# Val    :", val_set.nSamples)
+    print("# Val    :", val_set.nSamples, "(%s)" % eval_list)
     print("################################################")
     return data_loader_train, data_loader_val
 

@@ -1,7 +1,7 @@
-TAG: 'APGCC_MoNuSeg_finetune'
+TAG: 'APGCC_BCData_finetune'
 SEED: 1229
 GPU_ID: 3
-OUTPUT_DIR: './output/MoNuSeg_finetune/'
+OUTPUT_DIR: './output/BCData_finetune/'
 VIS: False
 
 # -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ MODEL:
   AUX_RANGE: [2, 8]
   AUX_kwargs: {'pos_coef': 1., 'neg_coef': 1., 'pos_loc': 0.0002, 'neg_loc': 0.0002}
 
-# Fine-tune from SHHA official weights (unified protocol with BCData/CoNIC)
+# 从 SHHA 官方权重初始化，仅加载模型权重（不恢复 optimizer/epoch）
 RESUME: True
 RESUME_PATH: './output/SHHA_best.pth'
 FINETUNE: True
@@ -48,18 +48,17 @@ FINETUNE: True
 # Dataset
 # -----------------------------------------------------------------------------
 DATASETS:
-  DATASET: 'SHHA'
-  DATA_ROOT: '/data1/llx/MoNuSegdata'
-  EVAL_LIST: 'val.list'   # 3-way split: best.pth is selected on val.list; final test() uses test.list
+  DATASET: 'SHHA'                         # 沿用 SHHA 的 DataLoader 逻辑
+  DATA_ROOT: '/mnt/data1/llx/BCData'
 
 # -----------------------------------------------------------------------------
 # DATALOADER
 # -----------------------------------------------------------------------------
 DATALOADER:
   AUGUMENTATION: ['Normalize', 'Crop', 'Flip']
-  CROP_SIZE: 256
+  CROP_SIZE: 256      # 细胞图像 640x640，裁剪块稍大
   CROP_NUMBER: 4
-  UPPER_BOUNDER: -1
+  UPPER_BOUNDER: 1024
   NUM_WORKERS: 4
 
 # ---------------------------------------------------------------------------- #
@@ -68,8 +67,8 @@ DATALOADER:
 SOLVER:
   BATCH_SIZE: 8
   START_EPOCH: 0
-  EPOCHS: 200
-  LR: 0.00005
+  EPOCHS: 200       # 微调不需要像从头训练的 3500 epoch
+  LR: 0.00005        # 微调用更小的学习率
   LR_BACKBONE: 0.000005
   WEIGHT_DECAY: 0.0001
   LR_DROP: 800
@@ -90,4 +89,4 @@ MATCHER:
 # -----------------------------------------------------------------------------
 TEST:
   THRESHOLD: 0.5
-  WEIGHT: './output/MoNuSeg_finetune/best.pth'
+  WEIGHT: './output/BCData_finetune/best_mae.pth'

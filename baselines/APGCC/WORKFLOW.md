@@ -116,3 +116,45 @@ git check-ignore <文件>         # 确认某文件是否被 .gitignore 忽略
 2. **只动自己的目录**：改动尽量限制在 `baselines/APGCC/`，避免和队友冲突。
 3. **本基线直接改官方代码**（不分 official/+src/），和队友约定不同，push 前在群里说明一下。
 4. **勤 commit、勤 pull**：每完成一小块就 commit；每天开工先 pull main 合并，减少冲突。
+
+
+# 测试（训练完后，test() 固定用 test.list）
+python main.py -t -c ./configs/MoNuSeg_finetune.yml \
+  GPU_ID 2 \
+  TEST.WEIGHT ./output/MoNuSeg_finetune/best.pth
+
+  # 训练：覆盖 DATA_ROOT（配置里的 /mnt 路径不存在）+ EVAL_LIST 用 val.list 做 3-way
+nohup python main.py -c ./configs/CoNIC_finetune.yml \
+  GPU_ID 3 \
+  DATASETS.DATA_ROOT /data1/llx/CoNICdata \
+  DATASETS.EVAL_LIST val.list \
+  > train_conic.log 2>&1 &
+
+# 测试
+python main.py -t -c ./configs/CoNIC_finetune.yml \
+  GPU_ID 3 \
+  DATASETS.DATA_ROOT /data1/llx/CoNICdata \
+  TEST.WEIGHT ./output/CoNIC_finetune/best.pth
+
+  # 训练：覆盖 DATA_ROOT(配置是 /mnt 错路径) + EVAL_LIST 用 val.list
+nohup python main.py -c ./configs/BCData_finetune.yml \
+  GPU_ID 5 \
+  DATASETS.DATA_ROOT /data1/llx/BCData \
+  DATASETS.EVAL_LIST val.list \
+  SOLVER.LOG_FREQ 1 SOLVER.EVAL_FREQ 1 \
+  > train_bcdata.log 2>&1 &
+
+# 测试
+python main.py -t -c ./configs/BCData_finetune.yml \
+  GPU_ID 5 \
+  DATASETS.DATA_ROOT /data1/llx/BCData \
+  TEST.WEIGHT ./output/BCData_finetune/best.pth
+
+  PY=/home/lixinli/anaconda3/envs/apgcc/bin/python
+# 例：CoNIC（其余替换 config/weight/data-root）
+$PY eval_centroid.py --config ./configs/CoNIC_unified.yml \
+  --weight ./output/CoNIC_unified/best.pth \
+  --data-root /data1/llx/CoNICdata --gpu 3 \
+  --out-dir ./output/CoNIC_unified/centroid_eval
+$PY benchmark_efficiency.py --config ./configs/CoNIC_unified.yml \
+  --weight ./output/CoNIC_unified/best.pth --gpu 3 --out ./output/efficiency_apgcc_unified.json
