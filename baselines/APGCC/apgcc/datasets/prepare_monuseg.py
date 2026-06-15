@@ -1,8 +1,14 @@
 """
-Convert MoNuSeg dataset to APGCC txt format.
+Convert MoNuSeg 2018 to APGCC txt format with a reproducible 30/7/14 split.
+
+Split is defined by ``monuseg_split.json`` (next to this script): the exact TCGA
+ids for train(30) / val(7) / test(14). See that file for the rationale (held-out
+rare-organ validation; organ per image derived from the TCGA TSS code). train+val
+ids live in "MoNuSeg 2018 Training Data" (37 images); test ids live in
+"MoNuSegTestData" (14 images).
 
 MoNuSeg structure:
-  Training:
+  Training pool (train + val):
     "MoNuSeg 2018 Training Data/Tissue Images/<id>.tif"
     "MoNuSeg 2018 Training Data/Annotations/<id>.xml"
   Test:
@@ -10,18 +16,16 @@ MoNuSeg structure:
     "MoNuSegTestData/<id>.xml"
 
 Each XML contains <Region> elements whose <Vertices> define a nucleus polygon.
-We compute the centroid of each polygon as the annotation point.
+We compute the centroid (mean of polygon vertices) as the annotation point.
 
 Output (under DATA_ROOT):
-  train/<id>.png
-  test/<id>.png
-  train_gt/<id>.txt     "x y" per nucleus
-  test_gt/<id>.txt
-  train.list
-  test.list
+  train/<id>.png   val/<id>.png   test/<id>.png
+  train_gt/<id>.txt  val_gt/<id>.txt  test_gt/<id>.txt    "x y" per nucleus
+  train.list  val.list  test.list                          "<split>/<id>.png <split>_gt/<id>.txt"
 """
 
 import os
+import json
 import argparse
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -43,70 +47,73 @@ def parse_xml(xml_path):
     return centroids
 
 
-def process_split(img_dir, ann_dir, out_img_dir, out_gt_dir, data_root, list_name):
+def process_split(ids, img_dir, ann_dir, out_img_dir, out_gt_dir, data_root, list_name):
+    """Convert the given ids (found under img_dir/ann_dir) into <split>/ + <split>_gt/ + list."""
     os.makedirs(out_img_dir, exist_ok=True)
     os.makedirs(out_gt_dir, exist_ok=True)
 
-    tif_files = sorted(f for f in os.listdir(img_dir) if f.endswith('.tif'))
+    split = os.path.basename(out_img_dir)
     list_lines = []
 
-    for fname in tif_files:
-        stem = os.path.splitext(fname)[0]
-        img_src = os.path.join(img_dir, fname)
+    for stem in ids:
+        img_src = os.path.join(img_dir, stem + '.tif')
         xml_path = os.path.join(ann_dir, stem + '.xml')
+        if not os.path.exists(img_src):
+            raise FileNotFoundError('image not found: %s' % img_src)
 
         # save image as PNG
         img = cv2.imread(img_src)
         out_img_path = os.path.join(out_img_dir, stem + '.png')
         cv2.imwrite(out_img_path, img)
 
-        # parse annotations
+        # parse annotations -> centroids
         centroids = parse_xml(xml_path) if os.path.exists(xml_path) else []
         gt_path = os.path.join(out_gt_dir, stem + '.txt')
         with open(gt_path, 'w') as f:
             for cx, cy in centroids:
-                f.write(f'{cx:.2f} {cy:.2f}\n')
+                f.write('%.2f %.2f\n' % (cx, cy))
 
-        split = os.path.basename(out_img_dir)
         rel_img = os.path.join(split, stem + '.png')
-        rel_gt  = os.path.relpath(gt_path, data_root)
-        list_lines.append(f'{rel_img} {rel_gt}')
+        rel_gt = os.path.relpath(gt_path, data_root)
+        list_lines.append('%s %s' % (rel_img, rel_gt))
 
     list_path = os.path.join(data_root, list_name)
     with open(list_path, 'w') as f:
         f.write('\n'.join(list_lines) + '\n')
 
-    print(f'[{list_name}] {len(list_lines)} images saved.')
+    print('[%s] %d images saved.' % (list_name, len(list_lines)))
 
 
 def main():
+    here = os.path.dirname(os.path.abspath(__file__))
     parser = argparse.ArgumentParser()
-    parser.add_argument('data_root', help='output root, e.g. /mnt/data1/llx/MoNuSegdata')
+    parser.add_argument('data_root', help='output root, e.g. /data1/llx/MoNuSegdata')
     parser.add_argument('--train-img', required=True, help='path to "MoNuSeg 2018 Training Data/Tissue Images"')
     parser.add_argument('--train-ann', required=True, help='path to "MoNuSeg 2018 Training Data/Annotations"')
     parser.add_argument('--test-dir',  required=True, help='path to MoNuSegTestData (contains .tif and .xml)')
+    parser.add_argument('--split-json', default=os.path.join(here, 'monuseg_split.json'),
+                        help='split definition (default: monuseg_split.json next to this script)')
     args = parser.parse_args()
+
+    with open(args.split_json) as f:
+        split = json.load(f)
+    train_ids = [x['id'] for x in split['train']]
+    val_ids   = [x['id'] for x in split['val']]
+    test_ids  = [x['id'] for x in split['test']]
+    print('Split: %d train / %d val / %d test (from %s)' %
+          (len(train_ids), len(val_ids), len(test_ids), os.path.basename(args.split_json)))
 
     root = args.data_root
     os.makedirs(root, exist_ok=True)
 
-    process_split(
-        img_dir=args.train_img,
-        ann_dir=args.train_ann,
-        out_img_dir=os.path.join(root, 'train'),
-        out_gt_dir=os.path.join(root, 'train_gt'),
-        data_root=root,
-        list_name='train.list',
-    )
-
-    process_split(
-        img_dir=args.test_dir,
-        ann_dir=args.test_dir,
-        out_img_dir=os.path.join(root, 'test'),
-        out_gt_dir=os.path.join(root, 'test_gt'),
-        data_root=root,
-        list_name='test.list',
-    )
+    # train and val both come from the 37-image training pool
+    process_split(train_ids, args.train_img, args.train_ann,
+                  os.path.join(root, 'train'), os.path.join(root, 'train_gt'), root, 'train.list')
+    process_split(val_ids, args.train_img, args.train_ann,
+                  os.path.join(root, 'val'), os.path.join(root, 'val_gt'), root, 'val.list')
+    # test comes from the official MoNuSegTestData (images and xml in the same dir)
+    process_split(test_ids, args.test_dir, args.test_dir,
+                  os.path.join(root, 'test'), os.path.join(root, 'test_gt'), root, 'test.list')
 
     print('Done. Data root:', root)
 

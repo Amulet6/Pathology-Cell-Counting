@@ -7,10 +7,10 @@ from PIL import Image
 import cv2
 
 class ImageDataset(Dataset):
-    def __init__(self, data_root, transform=None, train=False, aug_dict=None):
+    def __init__(self, data_root, transform=None, train=False, aug_dict=None, eval_list="test.list"):
         self.root_path = data_root
         self.train_lists = "train.list"   # check this
-        self.eval_list = "test.list"      # check this
+        self.eval_list = eval_list        # list used when train=False (e.g. 'val.list' or 'test.list')
         # there may exist multiple list files
         self.img_list_file = self.train_lists.split(',')
         if train:
@@ -50,6 +50,16 @@ class ImageDataset(Dataset):
             self.crop_size = 128      # random crop size
             self.crop_number = 4      # the number of crop sample
 
+        # team-unified ONLINE augmentation (Route B); native path is left untouched
+        self.aug_protocol = getattr(aug_dict, 'AUG_PROTOCOL', 'native') if aug_dict is not None else 'native'
+        self.unified = None
+        if self.train and self.aug_protocol == 'unified':
+            from .aug_unified import UnifiedAug
+            affine_on = bool(getattr(aug_dict, 'UNIFIED_AFFINE', True))
+            self.unified = UnifiedAug(crop_size=self.crop_size,
+                                      crop_number=self.crop_number,
+                                      affine_on=affine_on)
+
     def __len__(self):
         return self.nSamples
 
@@ -63,6 +73,21 @@ class ImageDataset(Dataset):
         # imgs, points_array (whole image)
         #####################################
         img, point = load_data((img_path, gt_path), self.train)
+
+        # ===== team-unified ONLINE augmentation (train only); native path below unchanged =====
+        if self.train and self.unified is not None:
+            patches, ppoints = self.unified(np.array(img), point)   # img: PIL RGB -> HWC uint8
+            img = torch.stack([self.transform(Image.fromarray(p)) for p in patches])  # (N,C,H,W)
+            point = [torch.Tensor(np.asarray(pp, dtype=np.float32).reshape(-1, 2)) for pp in ppoints]
+            target = [{} for i in range(len(point))]
+            for i, _ in enumerate(point):
+                target[i]['point'] = torch.Tensor(point[i])
+                stem = img_path.split('/')[-1].split('.')[0].split('_')[-1]
+                image_id = int(stem) if stem.isdigit() else abs(hash(stem)) % 1000000
+                target[i]['image_id'] = torch.Tensor([image_id]).long()
+                target[i]['labels'] = torch.ones([point[i].shape[0]]).long()
+                target[i]['name'] = os.path.basename(img_path)
+            return img, target
 
         #####################################
         # Data Augumentation

@@ -120,12 +120,12 @@
         {
           "step": 5,
           "action": "写入 txt 文件",
-          "detail": "每行写一个质心：'cx cy\\n'，保留两位小数，保存到 train_gt/<id>.txt 或 test_gt/<id>.txt"
+          "detail": "每行写一个质心：'cx cy\\n'，保留两位小数，保存到 train_gt/<id>.txt、val_gt/<id>.txt 或 test_gt/<id>.txt"
         }
       ],
       "output_format": "每行一个质心坐标：'cx cy'，浮点数，保留两位小数",
       "note": "与 CoNIC 的质心计算不同：CoNIC 基于像素掩码计算（所有属于该实例的像素均值），MoNuSeg 基于轮廓顶点计算（多边形顶点均值）。两者结果接近但不完全相同",
-      "split_rule": "直接使用数据集官方的 train / test 划分，训练集来自 'MoNuSeg 2018 Training Data'，测试集来自 'MoNuSegTestData'"
+      "split_rule": "3 划分 30 train / 7 val / 14 test，由 monuseg_split.json 固化（精确 TCGA id，可完全复现）。train+val 来自 'MoNuSeg 2018 Training Data'（37 张），test 来自 'MoNuSegTestData'（14 张，官方不动）。val=最稀有/外围器官（Colon/Stomach/Liver/Brain/Cervix，按 GDC TSS 码判定），训练期选 best.pth 用之，最终指标在 test 上报。注意：这 37 张训练集并非论文 Kumar-2017 那精确 30 张的超集，故未照搬论文 12/4/14 协议。"
     }
   },
 

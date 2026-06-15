@@ -1,7 +1,7 @@
-TAG: 'APGCC_MoNuSeg_finetune'
+TAG: 'APGCC_CoNIC_finetune'
 SEED: 1229
-GPU_ID: 3
-OUTPUT_DIR: './output/MoNuSeg_finetune/'
+GPU_ID: 0
+OUTPUT_DIR: './output/CoNIC_finetune/'
 VIS: False
 
 # -----------------------------------------------------------------------------
@@ -39,7 +39,7 @@ MODEL:
   AUX_RANGE: [2, 8]
   AUX_kwargs: {'pos_coef': 1., 'neg_coef': 1., 'pos_loc': 0.0002, 'neg_loc': 0.0002}
 
-# Fine-tune from SHHA official weights (unified protocol with BCData/CoNIC)
+# Fine-tune from SHHA pretrained weights (load model weights only, not optimizer/epoch)
 RESUME: True
 RESUME_PATH: './output/SHHA_best.pth'
 FINETUNE: True
@@ -49,15 +49,14 @@ FINETUNE: True
 # -----------------------------------------------------------------------------
 DATASETS:
   DATASET: 'SHHA'
-  DATA_ROOT: '/data1/llx/MoNuSegdata'
-  EVAL_LIST: 'val.list'   # 3-way split: best.pth is selected on val.list; final test() uses test.list
+  DATA_ROOT: '/mnt/data1/llx/CoNICdata'
 
 # -----------------------------------------------------------------------------
 # DATALOADER
 # -----------------------------------------------------------------------------
 DATALOADER:
   AUGUMENTATION: ['Normalize', 'Crop', 'Flip']
-  CROP_SIZE: 256
+  CROP_SIZE: 128
   CROP_NUMBER: 4
   UPPER_BOUNDER: -1
   NUM_WORKERS: 4
@@ -90,4 +89,4 @@ MATCHER:
 # -----------------------------------------------------------------------------
 TEST:
   THRESHOLD: 0.5
-  WEIGHT: './output/MoNuSeg_finetune/best.pth'
+  WEIGHT: './output/CoNIC_finetune/best_mae.pth'

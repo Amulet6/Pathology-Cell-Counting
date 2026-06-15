@@ -69,6 +69,7 @@ _C.FINETUNE = False   # if True, load weights only (skip optimizer/epoch restore
 _C.DATASETS = edict()
 _C.DATASETS.DATASET = 'SHHA' # dataset_file
 _C.DATASETS.DATA_ROOT = './dataset_path/' # data_root, path where the dataset is
+_C.DATASETS.EVAL_LIST = 'test.list' # list used for evaluation DURING training (best.pth selection). Set to 'val.list' for a 3-way split (e.g. MoNuSeg); final test() always uses test.list.
 
 # -----------------------------------------------------------------------------
 # DATALOADER
@@ -79,6 +80,8 @@ _C.DATALOADER.CROP_SIZE = 128 		# radnom crip size for training
 _C.DATALOADER.CROP_NUMBER = 4 		# the number of training sample
 _C.DATALOADER.UPPER_BOUNDER = -1 	# the upper bounder of size
 _C.DATALOADER.NUM_WORKERS = 8 		# num_workers
+_C.DATALOADER.AUG_PROTOCOL = 'native'   # 'native' (APGCC original) or 'unified' (team protocol)
+_C.DATALOADER.UNIFIED_AFFINE = True     # affine in unified aug; CoNIC sets False (HoVer-Net CoNIC drops affine)
 
 # ---------------------------------------------------------------------------- #
 # Solver

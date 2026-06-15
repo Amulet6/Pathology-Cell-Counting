@@ -6,13 +6,14 @@ BCData structure:
   annotations/{train,validation,test}/positive/<id>.h5  -> coordinates (N,2) [x,y]
   annotations/{train,validation,test}/negative/<id>.h5  -> coordinates (N,2) [x,y]
 
-Output structure (under DATA_ROOT):
-  train/<id>.png          (symlink or copy)
-  test/<id>.png
-  train_gt/<id>.txt       (merged positive+negative coordinates, one "x y" per line)
-  test_gt/<id>.txt
-  train.list              (relative_img_path  relative_gt_path)
-  test.list
+Output structure (under DATA_ROOT) — 3-way split, matching MoNuSeg/CoNIC:
+  train/<id>.png  val/<id>.png  test/<id>.png        (symlinks)
+  train_gt/<id>.txt  val_gt/<id>.txt  test_gt/<id>.txt  (merged pos+neg coords, "x y" per line)
+  train.list  val.list  test.list                    (relative_img_path  relative_gt_path)
+
+Mapping: images/train -> train.list, images/validation -> val.list,
+images/test -> test.list. val.list is used for best.pth selection during
+training (DATASETS.EVAL_LIST val.list); test.list is the final held-out set.
 """
 
 import os
@@ -50,8 +51,10 @@ def convert_split(data_root, split_name, out_split, out_gt_dir, list_name):
             h5_path = os.path.join(ann_dir, f'{stem}.h5')
             if os.path.exists(h5_path):
                 with h5py.File(h5_path, 'r') as f:
-                    pts = f['coordinates'][:]    # shape (N, 2), [x, y]
-                    coords.append(pts)
+                    pts = np.asarray(f['coordinates'][:])  # [x, y]; may be (N,2), (2,) or empty
+                    pts = pts.reshape(-1, 2)               # normalize: handles single-point / empty h5
+                    if len(pts):
+                        coords.append(pts)
 
         if coords:
             all_coords = np.concatenate(coords, axis=0)
@@ -82,18 +85,23 @@ def main():
     args = parser.parse_args()
     root = args.data_root
 
-    # train split
+    # 3-way split (train / val / test), consistent with MoNuSeg & CoNIC
     convert_split(root,
                   split_name='train',
                   out_split='train',
                   out_gt_dir=os.path.join(root, 'train_gt'),
                   list_name='train.list')
 
-    # validation -> used as test (APGCC only uses train.list / test.list)
     convert_split(root,
                   split_name='validation',
                   out_split='val',
                   out_gt_dir=os.path.join(root, 'val_gt'),
+                  list_name='val.list')
+
+    convert_split(root,
+                  split_name='test',
+                  out_split='test',
+                  out_gt_dir=os.path.join(root, 'test_gt'),
                   list_name='test.list')
 
     print('Done. Data root:', root)
