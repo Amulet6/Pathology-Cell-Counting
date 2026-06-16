@@ -221,16 +221,20 @@ __marimo__/
 # 🔬 病理图像细胞计数项目专用配置（追加部分）
 # =============================================================================
 # --- 🎯 多基线协作隔离规则 (Multi-Baseline Isolation) ---
-# 忽略官方原版代码仓库（避免代码冗余、冲突和污染主干）
-baselines/hovernet/official/
-# 如果其他同学也拉取了官方源码，可以在此补充，例如：
-# baselines/stardist/official/
-
 # 忽略各 Baseline 运行产生的局部缓存或临时数据
 baselines/*/outputs/
 baselines/*/data/
 baselines/*/**/*.npy
 baselines/*/**/*.mat
+
+# --- HoVerNet 训练产物（不上传）---
+baselines/hovernet/pretrained/
+baselines/hovernet/official/logs/
+baselines/hovernet/official/dataset/
+baselines/hovernet/official/.git/
+baselines/hovernet/conic_branch/exp_output/
+baselines/hovernet/conic_branch/.git/
+baselines/hovernet/conic_branch/__pycache__/
 
 # --- 深度学习模型权重（不上传）---
 checkpoints/
@@ -293,6 +297,13 @@ config_local.py
 *.key
 *.token
 
+
+# --- 项目文档（不上传）---
+docs/
+
+# --- 实验结果输出（不上传）---
+results/
+baselines/results/
 # --- PET baseline local artifacts ---
 outputs/
 pretrained/
