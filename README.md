@@ -142,3 +142,28 @@ conda activate path_cell
 
 # 安装依赖
 pip install -r requirements.txt
+
+## PET Baseline Added in This Repository
+
+This repository now includes the PET pathology-cell counting baseline adapted for
+BCData, CoNIC, and MoNuSeg.
+
+Important PET files:
+
+- `COURSE_PROJECT_README.md`: PET-specific course project notes, commands, and result table.
+- `prepare_cell_dataset.py`: conversion script for BCData, CoNIC, and MoNuSeg.
+- `main.py`: PET training entry.
+- `eval.py`: PET evaluation entry.
+- `engine.py`: training and evaluation loop with counting/localization metrics.
+- `datasets/`, `models/`, `util/`: PET data loading, model, and utility code.
+- `splits/`: shared split files used by PET experiments.
+
+Large local artifacts are intentionally not uploaded:
+
+- `data/`
+- `outputs/`
+- `pretrained/`
+- model weights such as `*.pth`
+
+Please see `COURSE_PROJECT_README.md` for the exact PET reproduction commands
+and the summarized PET results.

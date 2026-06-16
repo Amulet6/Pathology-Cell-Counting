@@ -1,0 +1,19 @@
+{
+  "dataset": "BCData",
+  "source": "data\\BCData_pet",
+  "mode": "export_pet",
+  "splits": {
+    "train": {
+      "count": 803,
+      "sha1": "29efd1eb56b65d4faf94a6d51fa8813b565d2a6c"
+    },
+    "val": {
+      "count": 133,
+      "sha1": "36f8cc5922f0287dcbd2689e8f93ff491513fc84"
+    },
+    "test": {
+      "count": 402,
+      "sha1": "a0ce19aacdd49a35d928813217bd99783cddd1e8"
+    }
+  }
+}
