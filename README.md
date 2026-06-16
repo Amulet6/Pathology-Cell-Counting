@@ -1,147 +1,169 @@
-# Point-Query Quadtree for Crowd Counting, Localization, and More (ICCV 2023)
+# Pathology Image Cell Counting (病理图像细胞计数)
 
-This repository includes the official implementation of the paper: 
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-1.8+-ee4c2c.svg)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-[**Point-Query Quadtree for Crowd Counting, Localization, and More**](https://arxiv.org/abs/2308.13814)
+## 项目简介 (Introduction)
 
-International Conference on Computer Vision (ICCV), 2023
+病理图像分析是临床诊断的基础，而精准的细胞计数是其核心任务。本项目旨在解决病理图像中细胞形态极不规则、密集堆叠重叠、以及不同实验室染色工艺差异导致的视觉域偏移等挑战。
 
-[Chengxin Liu](https://cxliu0.github.io/)<sup>1</sup>, [Hao Lu](https://sites.google.com/site/poppinace/)<sup>1</sup>, [Zhiguo Cao](http://english.aia.hust.edu.cn/info/1085/1528.htm)<sup>1</sup>, [Tongliang Liu](https://tongliang-liu.github.io/)<sup>2</sup>
+基于真实公开的病理图像数据集，本项目实现了多种先进的细胞计数与定位估计方法，包括密度图回归、点监督定位匹配以及实例分割，并对模型在复杂病理环境下的高效性与精准性进行了综合评估与改进。
 
-<sup>1</sup>Huazhong University of Science and Technology, China  
 
-<sup>2</sup>The University of Sydney, Australia
+## 项目目标 (Objectives)
 
-[[Paper]](https://arxiv.org/abs/2308.13814) | [[Supplementary]](https://drive.google.com/file/d/1WxdtOaEEccYrXuNQTn1k29lFDAetBm63/view?usp=sharing)
+1.  **多方法复现与对比**：在三个公开数据集上复现并对比至少三种不同类型的细胞计数方法：
+    *   **密度图回归 (Density Map Regression)**: 如 Steerer [4]
+    *   **点监督定位匹配 (Point Supervision)**: 如 PET [5]
+    *   **实例分割 (Instance Segmentation)**: 如 HoVer-Net [6]
+2.  **多维度评估**：
+    *   **宏观定量分析**：MAE, MSE
+    *   **微观定位分析**：Precision, Recall, F1-score
+    *   **效率指标**：模型参数量、计算量 (FLOPs)、推理时间
+3.  **模型改进与可视化**：基于综合效果最好的模型，针对细胞形态不规则、密集堆叠导致边界粘连等挑战进行改进，并输出可视化的预测位置/密度分布（散点图/热力图）。
 
-![PET](teaser.JPG)
+## 数据集 (Datasets)
 
-## Highlights
+本项目使用以下三个公开病理细胞切片数据集：
 
-We formulate crowd counting as a decomposable point querying process, where sparse input points could split into four new points when necessary. This formulation exhibits many appealing properties:
+| 数据集 | 全称 | 特点 | 引用 |
+| :--- | :--- | :--- | :--- |
+| **BCData** | Breast Cancer Cell Dataset | 专为点标注设计，包含大量严重重叠和形态不规则的乳腺癌细胞图像。 | [1] |
+| **CoNIC** | Colon Nuclei Identification and Counting | 结肠核识别和计数挑战赛数据，包含极其复杂的细胞形态和多类别细胞标签。 | [2] |
+| **MoNuSeg** | Multi-organ Nucleus Segmentation | 多器官细胞核分割与计数，涵盖多种器官的不同组织形态，染色差异极大。 | [3] |
 
-- *Intuitive*: The input and output are both interpretable and steerable
-  
-- *Generic*: PET is applicable to a number of crowd-related tasks, by simply adjusting the input format
-  
-- *Effective*: PET reports state-of-the-art crowd counting and localization results
-  
+## 项目结构 (project structure)（下为推荐示例）
 
-## Installation
-
-- Required packages:
-  
+<details>
+<summary>点击展开项目结构</summary>
+   
 ```
-torch
-torchvision
-numpy
-opencv-python
-scipy
-matplotlib
-```
+Pathology-Cell-Counting/
+├── README.md                    # 项目说明文档（最重要！）
+├── requirements.txt             # Python依赖包列表
+├── environment.yml             # Conda环境配置（可选）
+├── .gitignore                  # Git忽略文件配置
+├── LICENSE                     # 开源许可证（MIT/Apache 2.0）
+│
+│
+├── baselines/
+│   └── hovernet/  #其他基线同理
+│       ├── official/                 # 官方代码（.gitignore忽略）
+│       ├── src/                     # 自己写的封装、预处理、训练、评估
+│       │   ├── data/
+│       │   │   ├── download.py
+│       │   │   ├── preprocess.py
+│       │   │   ├── build_index.py
+│       │   │   └── split_dataset.py
+│       │   ├── datasets/
+│       │   │   ├── bcdata.py
+│       │   │   ├── conic.py
+│       │   │   └── monuseg.py
+│       │   ├── configs/
+│       │   │   ├── bcdata.yaml
+│       │   │   ├── conic.yaml
+│       │   │   └── monuseg.yaml
+│       │   ├── train.py
+│       │   ├── infer.py
+│       │   ├── evaluate.py
+│       │   └── utils.py
+│       └── README.md
+├── data/
+│   ├── raw/
+│   │   ├── BCData/
+│   │   ├── CoNIC/
+│   │   └── MoNuSeg/
+│   ├── processed/
+│       ├── BCData/
+│       ├── CoNIC/
+│       └── MoNuSeg/
+|
+├── logs/                       # 训练日志（.gitignore忽略）
+│   ├── train_log.txt
+│   └── tensorboard_logs/
+│
+│
+├── results/                    # 实验结果（.gitignore忽略）
+│   ├── predictions/
+│   ├── visualizations/
+│   └── metrics_summary.json
+│
+└── docs/                       # 文档
+    ├── dataset_intro.md       # 数据集介绍
+    ├── methods.md             # 方法说明
+    └── progress_report.md     # 进度报告   
+  
 
-- Install packages:
+```  
+</details>
 
-```
+## 方法 (Methods)
+
+本项目考虑实现以下核心算法（下为举例）：
+
+### 1. HoVer-Net (Instance Segmentation)
+同时实现细胞核的分割与分类。通过水平与垂直距离图（Horizontal and Vertical maps）解决实例粘连问题。
+*   **Reference**: Graham et al., Medical Image Analysis, 2019 [6]
+
+### 2. STEERER (Density Map Regression)
+通过选择性继承学习（Selective Inheritance Learning）解决计数和定位中的尺度变化问题。
+*   **Reference**: Han et al., ICCV 2023 [4]
+
+### 3. PET (Point-query Quadtree)
+基于点查询四叉树的人群计数、定位方法，适用于密集细胞场景。
+*   **Reference**: Liu et al., ICCV 2023 [5]
+
+## 参考文献 (references)
+[1] Huang, Z., et al. (2020). Bc A large-scale dataset and benchmark for cell detection and counting. MICCAI.
+
+[2] Graham, S., et al. (2024). CoNIC Challenge: Pushing the frontiers of nuclear detection, segmentation, classification and counting. Medical Image Analysis.
+
+[3] Kumar, N., et al. (2019). A multi-organ nucleus segmentation challenge. IEEE TMI.
+
+[4] Graham, S., et al. (2019). HoVer-Net: Simultaneous segmentation and classification of nuclei in multi-tissue histology images. Medical Image Analysis.
+
+[5] Liu, C., et al. (2023). Point-Query Quadtree for Crowd Counting, Localization, and More. ICCV.
+
+[6] Han, T., et al. (2023). STEERER: Resolving scale variations for counting and localization via selective inheritance learning. ICCV.
+
+## 快速开始 (Quick Start)
+
+### 环境配置 (Installation)
+
+```bash
+# 克隆仓库
+git clone https://github.com/YourUsername/Pathology-Cell-Counting.git
+cd Pathology-Cell-Counting
+
+# 创建虚拟环境
+conda create -n path_cell python=3.8 （或许需要统一版本，避免环境不兼容）
+conda activate path_cell
+
+# 安装依赖
 pip install -r requirements.txt
-```
 
+## PET Baseline Added in This Repository
 
-## Data Preparation
+This repository now includes the PET pathology-cell counting baseline adapted for
+BCData, CoNIC, and MoNuSeg.
 
-- Download crowd-counting datasets, e.g., [ShanghaiTech](https://github.com/desenzhou/ShanghaiTechDataset).
-  
-- We expect the directory structure to be as follows:
-  
+Important PET files:
 
-```
-PET
-├── data
-│    ├── ShanghaiTech
-├── datasets
-├── models
-├── ...
-```
+- `COURSE_PROJECT_README.md`: PET-specific course project notes, commands, and result table.
+- `prepare_cell_dataset.py`: conversion script for BCData, CoNIC, and MoNuSeg.
+- `main.py`: PET training entry.
+- `eval.py`: PET evaluation entry.
+- `engine.py`: training and evaluation loop with counting/localization metrics.
+- `datasets/`, `models/`, `util/`: PET data loading, model, and utility code.
+- `splits/`: shared split files used by PET experiments.
 
-- Alternatively, you can define the path of the dataset in [datasets/__init__.py](datasets/__init__.py)
+Large local artifacts are intentionally not uploaded:
 
-- For [UCF-QNRF](https://www.crcv.ucf.edu/data/ucf-qnrf/), [JHU-Crowd++](http://www.crowd-counting.com/), and [NWPU-Crowd](https://gjy3035.github.io/NWPU-Crowd-Sample-Code/) datasets, please refer to [preprocess_dataset.py](https://github.com/cxliu0/PET/blob/main/preprocess_dataset.py):
+- `data/`
+- `outputs/`
+- `pretrained/`
+- model weights such as `*.pth`
 
-  * change [```dataset```](https://github.com/cxliu0/PET/blob/main/preprocess_dataset.py#L217) and [```data_root```](https://github.com/cxliu0/PET/blob/main/preprocess_dataset.py#L218)
-  * run ```python preprocess_dataset.py```
-
-
-## Training
-
-- Download ImageNet pretrained [vgg16_bn](https://download.pytorch.org/models/vgg16_bn-6c64b313.pth), and put it in ```pretrained``` folder. Or you can define your pre-trained model path in [models/backbones/vgg.py](models/backbones/vgg.py)
-  
-
-- To train PET on ShanghaiTech PartA, run
-  
-  ```
-  sh train.sh
-  ```
-  
-
-## Evaluation
-
-- Modify [eval.sh](eval.sh)
-  - change ```--resume``` to your local model path
-- Run
-
-```
-sh eval.sh
-```
-
-## Pretrained Models
-
-- Environment:
-```
-python==3.8
-pytorch==1.12.1
-torchvision==0.13.1
-```
-
-- Models:
-
-| Dataset                  | Model Link  | Training Log  | MAE |
-| ------------------------ | ----------- | --------------| ----|
-| ShanghaiTech PartA       |  [SHA_model.pth](https://drive.google.com/file/d/1QwV8hrEDs1LQ4h1TH4KSL8tB51AImNMT/view?usp=drive_link)   | [SHA_log.txt](https://drive.google.com/file/d/1UpY61L0KWRA9c29CM9FMX34bHyprnPUY/view?usp=sharing) | 49.08 |
-| ShanghaiTech PartB       |  [SHB_model.pth](https://drive.google.com/file/d/10HK42xC6fmOK-5lQfu-pTn6oAHYeRUhv/view?usp=sharing)   | [SHB_log.txt](https://drive.google.com/file/d/1M74PI0XuJtQraPOUiCQJSCUjrWoJUq3n/view?usp=sharing) | 6.18 |
-| UCF_QNRF                 |  [UCF_QNRF.pth](https://drive.google.com/file/d/129l__gW51UtTQnPKM-90lTZo508-Eh7I/view?usp=sharing)    | - | - |
-| JHU_Crowd                |  [JHU_Crowd.pth](https://drive.google.com/file/d/1D4vtoYhQuvj_5onJaXJRtWrlwrl2ckbE/view?usp=sharing)   | - | - |
-| NWPU_Crowd               |  [NWPU_Crowd.pth](https://drive.google.com/file/d/1MX7tQAexyc9slrt7TaNSK7j8RtSvnI2H/view?usp=sharing)  | - | - |
-
-
-## Frequently Asked Questions (FAQ)
-
-* The model trained on my custom dataset does not perform well, why?
-  * Please check the [load_data](https://github.com/cxliu0/PET/blob/main/datasets/SHA.py#L105) function in your custom dataset. The input format should be (y, x) instead of (x, y). If the input annotations are wrong during training, the output of the trained model could be abnormal.
- 
-* How to deal with images with no person?
-  * Please refer to this [issue](https://github.com/cxliu0/PET/issues/33#issuecomment-2782560733).
-
-## Citation
-
-If you find this work helpful for your research, please consider citing:
-
-```
-@InProceedings{liu2023pet,
-  title={Point-Query Quadtree for Crowd Counting, Localization, and More},
-  author={Liu, Chengxin and Lu, Hao and Cao, Zhiguo and Liu, Tongliang},
-  booktitle={Proceedings of the IEEE/CVF International Conference on Computer Vision (ICCV)},
-  year={2023}
-}
-```
-
-
-## Permission
-
-This code is for academic purposes only. Contact: Chengxin Liu (cx_liu@hust.edu.cn)
-
-
-## Acknowledgement
-
-We thank the authors of [DETR](https://github.com/facebookresearch/detr) and [P2PNet](https://github.com/TencentYoutuResearch/CrowdCounting-P2PNet) for open-sourcing their work.
-
-
+Please see `COURSE_PROJECT_README.md` for the exact PET reproduction commands
+and the summarized PET results.
