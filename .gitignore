@@ -304,19 +304,3 @@ tmp/
 
 # Keep shared split CSV files tracked even though general CSV files are ignored.
 !splits/**/*.csv
-
-# --- CellVTA / local reproduction layout ---
-envs/
-datasets_external/
-downloads/
-repos/
-results/
-share/*.tar.gz
-share/cellvta_conic_release_2026-06-09/data/
-reports/cellvta_efficiency/
-reports/cellvta_efficiency_unified/
-reports/cellvta_centroid_eval/
-reports/cellvta_centroid_eval_unified/
-*.bin
-.gitignore.local.bak
-requirements.local.bak
