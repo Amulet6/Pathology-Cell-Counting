@@ -1,0 +1,11 @@
+**/__pycache__/
+
+datasets/*
+logs/*
+WSI/*
+
+*.bin
+nohup.out
+
+!WSI/preprocessing_example.yaml
+!README.md
