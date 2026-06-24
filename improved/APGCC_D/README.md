@@ -32,10 +32,17 @@ pip install -r requirements.txt
 ```
 
 ### 2. 预训练权重
-从 baselines 软链或重新下载：
+
+下载 APGCC 官方 SHHA 预训练权重（Google Drive）：
+
 ```bash
-ln -s ../../baselines/APGCC/SHHA_best.pth apgcc/output/SHHA_best.pth
+cd apgcc/output
+# Google Drive 下载（约 68MB）
+wget --no-check-certificate 'https://docs.google.com/uc?export=download&id=1pEvn5RrvmDqVJUDZ4c9-rCJcl2I7bRhu' -O SHHA_best.pth
+cd ../..
 ```
+
+> 此权重来自 [APGCC 官方仓库](https://github.com/AaronCIH/APGCC)，在 ShanghaiTech Part A 上预训练的 VGG16-bn + IFI 模型。
 
 ### 3. 准备数据
 参考 `apgcc/datasets/prepare_*.py` 将数据转换为 APGCC 格式。
