@@ -1,0 +1,15 @@
+{
+  "params_M": 17.75048,
+  "flops_G": 40.722629,
+  "flops_source": "torch_profiler",
+  "latency_ms": 8.491297,
+  "latency_std": 0.163605,
+  "throughput_fps": 117.7676,
+  "gpu_model": "NVIDIA GeForce RTX 3090",
+  "pytorch_ver": "2.4.1+cu121",
+  "cuda_ver": "12.1",
+  "batch_size": 1,
+  "input_size": 256,
+  "warmup": 10,
+  "iters": 100
+}

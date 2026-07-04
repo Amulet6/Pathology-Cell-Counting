@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Model weights (download separately)
+*.pth
+*.pt
+*.ckpt
+*.safetensors
+
+# Raw data
+data/
+*.npy
+*.h5
+*.tif
+*.tiff
+*.svs
+
+# Large logs / checkpoints
+*.log.json
+wandb/
+tensorboard_logs/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
