@@ -222,7 +222,6 @@ __marimo__/
 # =============================================================================
 # --- 🎯 多基线协作隔离规则 (Multi-Baseline Isolation) ---
 # 忽略官方原版代码仓库（避免代码冗余、冲突和污染主干）
-baselines/hovernet/official/
 # 如果其他同学也拉取了官方源码，可以在此补充，例如：
 # baselines/stardist/official/
 
@@ -303,7 +302,7 @@ tmp/
 *.log.json
 
 # Keep shared split CSV files tracked even though general CSV files are ignored.
-!splits/**/*.csv
+!data_conversion/splits/**/*.csv
 
 # --- CellVTA / local reproduction layout ---
 envs/
@@ -311,8 +310,8 @@ datasets_external/
 downloads/
 repos/
 results/
-share/*.tar.gz
-share/cellvta_conic_release_2026-06-09/data/
+baselines/cellvta/share/*.tar.gz
+baselines/cellvta/share/cellvta_conic_release_2026-06-09/data/
 reports/cellvta_efficiency/
 reports/cellvta_efficiency_unified/
 reports/cellvta_centroid_eval/
@@ -320,3 +319,15 @@ reports/cellvta_centroid_eval_unified/
 *.bin
 .gitignore.local.bak
 requirements.local.bak
+
+# Repository hygiene
+*.swp
+**/.vscode/
+*.tfevents.*
+baselines/*/output/
+
+# Allow the missing STEERER core to be added in a future branch update.
+!baselines/steerer/lib/
+!baselines/steerer/lib/**
+!baselines/steerer/lib_cls/
+!baselines/steerer/lib_cls/**

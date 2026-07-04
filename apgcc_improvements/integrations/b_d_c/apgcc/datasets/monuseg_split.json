@@ -1,0 +1,81 @@
+{
+  "name": "MoNuSeg APGCC 30/7/14 split",
+  "description": "Reproducible train/val/test split for MoNuSeg 2018 used by the APGCC counting baseline. train+val come from 'MoNuSeg 2018 Training Data' (37 images); test is the official 'MoNuSegTestData' (14 images). Anyone using this file gets exactly the same image-level split.",
+  "rationale": {
+    "paper_reference": "Kumar et al., 'A Dataset and a Technique for Generalized Nuclear Segmentation for Computational Pathology', IEEE TMI 2017 (the original MoNuSeg dataset paper).",
+    "paper_protocol_note": "The paper's own protocol is 12 train / 4 val / 14 test over 30 images (Table I + Sec.V). We do NOT copy it verbatim, because the 37-image MoNuSeg-2018 training set is NOT a superset of the paper's exact 30 images (organ composition differs: paper has 6 liver / no lung-brain-cervix; the 37-set has 1 liver, 6 lung, 1 brain, 1 cervix). So 'extract the paper's 30 from the 37' is not literally possible.",
+    "split_policy": "30 train / 7 val / 14 test. Validation = the 7 images from the rarest / most peripheral organs in the training pool (held-out-organ style, matching the paper's 'different-organ test' generalization philosophy). The remaining 30 train; the official 14 test are untouched.",
+    "organ_source": "Organ per image derived from the TCGA Tissue Source Site (TSS) code (2nd barcode field) via the authoritative GDC TSS code table.",
+    "caveats": [
+      "Brain and Colon appear in val (not train) but also appear in the test set -> the model never trains on brain/colon. This is intentional (generalization to unseen organs), but expect weaker test performance on those two organs.",
+      "val organs (liver/stomach/cervix) are absent from the test set, so the validation metric is only a partial proxy for test performance."
+    ]
+  },
+  "image_root": {
+    "train_val": "/data1/llx/MoNuSeg 2018 Training Data/Tissue Images (*.tif) + ../Annotations (*.xml)",
+    "test": "/data1/llx/MoNuSegTestData (*.tif + *.xml)"
+  },
+  "organ_distribution": {
+    "train_pool_37": {"Kidney": 10, "Breast": 6, "Prostate": 6, "Lung": 6, "Bladder": 2, "Colon": 2, "Stomach": 2, "Liver": 1, "Brain": 1, "Cervix": 1},
+    "train_30": {"Kidney": 10, "Breast": 6, "Prostate": 6, "Lung": 6, "Bladder": 2},
+    "val_7": {"Colon": 2, "Stomach": 2, "Liver": 1, "Brain": 1, "Cervix": 1},
+    "test_14": {"Kidney": 3, "Lung": 2, "Brain": 2, "Breast": 2, "Bladder": 2, "Prostate": 2, "Colon": 1}
+  },
+  "train": [
+    {"id": "TCGA-B0-5698-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-B0-5710-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-B0-5711-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-HE-7128-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-HE-7129-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-HE-7130-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-F9-A8NY-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-MH-A561-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-UZ-A9PJ-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-UZ-A9PN-01Z-00-DX1", "organ": "Kidney"},
+    {"id": "TCGA-A7-A13E-01Z-00-DX1", "organ": "Breast"},
+    {"id": "TCGA-A7-A13F-01Z-00-DX1", "organ": "Breast"},
+    {"id": "TCGA-AR-A1AK-01Z-00-DX1", "organ": "Breast"},
+    {"id": "TCGA-AR-A1AS-01Z-00-DX1", "organ": "Breast"},
+    {"id": "TCGA-E2-A14V-01Z-00-DX1", "organ": "Breast"},
+    {"id": "TCGA-E2-A1B5-01Z-00-DX1", "organ": "Breast"},
+    {"id": "TCGA-CH-5767-01Z-00-DX1", "organ": "Prostate"},
+    {"id": "TCGA-G9-6336-01Z-00-DX1", "organ": "Prostate"},
+    {"id": "TCGA-G9-6348-01Z-00-DX1", "organ": "Prostate"},
+    {"id": "TCGA-G9-6356-01Z-00-DX1", "organ": "Prostate"},
+    {"id": "TCGA-G9-6362-01Z-00-DX1", "organ": "Prostate"},
+    {"id": "TCGA-G9-6363-01Z-00-DX1", "organ": "Prostate"},
+    {"id": "TCGA-18-5592-01Z-00-DX1", "organ": "Lung"},
+    {"id": "TCGA-21-5784-01Z-00-DX1", "organ": "Lung"},
+    {"id": "TCGA-21-5786-01Z-00-DX1", "organ": "Lung"},
+    {"id": "TCGA-38-6178-01Z-00-DX1", "organ": "Lung"},
+    {"id": "TCGA-49-4488-01Z-00-DX1", "organ": "Lung"},
+    {"id": "TCGA-50-5931-01Z-00-DX1", "organ": "Lung"},
+    {"id": "TCGA-DK-A2I6-01A-01-TS1", "organ": "Bladder"},
+    {"id": "TCGA-G2-A2EK-01A-02-TSB", "organ": "Bladder"}
+  ],
+  "val": [
+    {"id": "TCGA-AY-A8YK-01A-01-TS1", "organ": "Colon"},
+    {"id": "TCGA-NH-A8F7-01A-01-TS1", "organ": "Colon"},
+    {"id": "TCGA-KB-A93J-01A-01-TS1", "organ": "Stomach"},
+    {"id": "TCGA-RD-A8N9-01A-01-TS1", "organ": "Stomach"},
+    {"id": "TCGA-BC-A217-01Z-00-DX1", "organ": "Liver"},
+    {"id": "TCGA-FG-A87N-01Z-00-DX1", "organ": "Brain"},
+    {"id": "TCGA-XS-A8TJ-01Z-00-DX1", "organ": "Cervix"}
+  ],
+  "test": [
+    {"id": "TCGA-2Z-A9J9-01A-01-TS1", "organ": "Kidney"},
+    {"id": "TCGA-GL-6846-01A-01-BS1", "organ": "Kidney"},
+    {"id": "TCGA-IZ-8196-01A-01-BS1", "organ": "Kidney"},
+    {"id": "TCGA-44-2665-01B-06-BS6", "organ": "Lung"},
+    {"id": "TCGA-69-7764-01A-01-TS1", "organ": "Lung"},
+    {"id": "TCGA-FG-A4MU-01B-01-TS1", "organ": "Brain"},
+    {"id": "TCGA-HT-8564-01Z-00-DX1", "organ": "Brain"},
+    {"id": "TCGA-AC-A2FO-01A-01-TS1", "organ": "Breast"},
+    {"id": "TCGA-AO-A0J2-01A-01-BSA", "organ": "Breast"},
+    {"id": "TCGA-CU-A0YN-01A-02-BSB", "organ": "Bladder"},
+    {"id": "TCGA-ZF-A9R5-01A-01-TS1", "organ": "Bladder"},
+    {"id": "TCGA-EJ-A46H-01A-03-TSC", "organ": "Prostate"},
+    {"id": "TCGA-HC-7209-01A-01-TS1", "organ": "Prostate"},
+    {"id": "TCGA-A6-6782-01A-01-BS1", "organ": "Colon"}
+  ]
+}

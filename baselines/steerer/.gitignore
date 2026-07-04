@@ -1,0 +1,16 @@
+exp/
+outputs/
+output/
+output0615/
+__pycache__/
+*.pyc
+*.pth
+*.pth.tar
+*.pt
+*.ckpt
+*.zip
+*.tar
+*.tar.gz
+*.log
+events.out.tfevents.*
+scale_statistic.json

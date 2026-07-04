@@ -1,169 +1,98 @@
-# Pathology Image Cell Counting (病理图像细胞计数)
+# Pathology Cell Counting
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-1.8+-ee4c2c.svg)](https://pytorch.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+面向 BCData、CoNIC 和 MoNuSeg 的病理细胞计数与定位项目。仓库按报告中的四个功能模块组织：数据转换、Baseline 复现、统一评价和 APGCC 改进。
 
-## 项目简介 (Introduction)
+## 仓库结构
 
-病理图像分析是临床诊断的基础，而精准的细胞计数是其核心任务。本项目旨在解决病理图像中细胞形态极不规则、密集堆叠重叠、以及不同实验室染色工艺差异导致的视觉域偏移等挑战。
-
-基于真实公开的病理图像数据集，本项目实现了多种先进的细胞计数与定位估计方法，包括密度图回归、点监督定位匹配以及实例分割，并对模型在复杂病理环境下的高效性与精准性进行了综合评估与改进。
-
-
-## 项目目标 (Objectives)
-
-1.  **多方法复现与对比**：在三个公开数据集上复现并对比至少三种不同类型的细胞计数方法：
-    *   **密度图回归 (Density Map Regression)**: 如 Steerer [4]
-    *   **点监督定位匹配 (Point Supervision)**: 如 PET [5]
-    *   **实例分割 (Instance Segmentation)**: 如 HoVer-Net [6]
-2.  **多维度评估**：
-    *   **宏观定量分析**：MAE, MSE
-    *   **微观定位分析**：Precision, Recall, F1-score
-    *   **效率指标**：模型参数量、计算量 (FLOPs)、推理时间
-3.  **模型改进与可视化**：基于综合效果最好的模型，针对细胞形态不规则、密集堆叠导致边界粘连等挑战进行改进，并输出可视化的预测位置/密度分布（散点图/热力图）。
-
-## 数据集 (Datasets)
-
-本项目使用以下三个公开病理细胞切片数据集：
-
-| 数据集 | 全称 | 特点 | 引用 |
-| :--- | :--- | :--- | :--- |
-| **BCData** | Breast Cancer Cell Dataset | 专为点标注设计，包含大量严重重叠和形态不规则的乳腺癌细胞图像。 | [1] |
-| **CoNIC** | Colon Nuclei Identification and Counting | 结肠核识别和计数挑战赛数据，包含极其复杂的细胞形态和多类别细胞标签。 | [2] |
-| **MoNuSeg** | Multi-organ Nucleus Segmentation | 多器官细胞核分割与计数，涵盖多种器官的不同组织形态，染色差异极大。 | [3] |
-
-## 项目结构 (project structure)（下为推荐示例）
-
-<details>
-<summary>点击展开项目结构</summary>
-   
-```
+```text
 Pathology-Cell-Counting/
-├── README.md                    # 项目说明文档（最重要！）
-├── requirements.txt             # Python依赖包列表
-├── environment.yml             # Conda环境配置（可选）
-├── .gitignore                  # Git忽略文件配置
-├── LICENSE                     # 开源许可证（MIT/Apache 2.0）
-│
-│
-├── baselines/
-│   └── hovernet/  #其他基线同理
-│       ├── official/                 # 官方代码（.gitignore忽略）
-│       ├── src/                     # 自己写的封装、预处理、训练、评估
-│       │   ├── data/
-│       │   │   ├── download.py
-│       │   │   ├── preprocess.py
-│       │   │   ├── build_index.py
-│       │   │   └── split_dataset.py
-│       │   ├── datasets/
-│       │   │   ├── bcdata.py
-│       │   │   ├── conic.py
-│       │   │   └── monuseg.py
-│       │   ├── configs/
-│       │   │   ├── bcdata.yaml
-│       │   │   ├── conic.yaml
-│       │   │   └── monuseg.yaml
-│       │   ├── train.py
-│       │   ├── infer.py
-│       │   ├── evaluate.py
-│       │   └── utils.py
-│       └── README.md
-├── data/
-│   ├── raw/
-│   │   ├── BCData/
-│   │   ├── CoNIC/
-│   │   └── MoNuSeg/
-│   ├── processed/
-│       ├── BCData/
-│       ├── CoNIC/
-│       └── MoNuSeg/
-|
-├── logs/                       # 训练日志（.gitignore忽略）
-│   ├── train_log.txt
-│   └── tensorboard_logs/
-│
-│
-├── results/                    # 实验结果（.gitignore忽略）
-│   ├── predictions/
-│   ├── visualizations/
-│   └── metrics_summary.json
-│
-└── docs/                       # 文档
-    ├── dataset_intro.md       # 数据集介绍
-    ├── methods.md             # 方法说明
-    └── progress_report.md     # 进度报告   
-  
+├── data_conversion/                 # 原始标注转统一中心点、固定数据划分
+│   ├── convert_to_points.py
+│   ├── export_splits.py
+│   ├── coordinate_protocol.json
+│   ├── protocols/
+│   └── splits/{BCData,CoNIC,MoNuSeg}/
+├── baselines/                       # 五种方法的训练、推理与结果整理
+│   ├── pet/
+│   ├── steerer/
+│   ├── apgcc/
+│   ├── hovernet/
+│   └── cellvta/
+├── evaluation/                      # 跨方法统一中心点评价
+│   ├── centroid_eval.py
+│   └── formats/predictions_json.md
+├── apgcc_improvements/              # APGCC 方向 A--E 与组合实验
+│   ├── directions/
+│   │   ├── a_threshold_calibration/
+│   │   ├── b_dense_auxiliary_supervision/
+│   │   ├── c_adaptive_nms/
+│   │   ├── d_dcnv2_edge_ignore/
+│   │   └── e_stain_domain_calibration/
+│   └── integrations/{a_d_e,b_d,b_d_c}/
+├── docs/                             # 项目记录、阶段报告与论文资料
+├── report/                           # 外部课程报告子模块
+├── LICENSE
+└── README.md
+```
 
-```  
-</details>
+## 1. 数据转换模块
 
-## 方法 (Methods)
-
-本项目考虑实现以下核心算法（下为举例）：
-
-### 1. HoVer-Net (Instance Segmentation)
-同时实现细胞核的分割与分类。通过水平与垂直距离图（Horizontal and Vertical maps）解决实例粘连问题。
-*   **Reference**: Graham et al., Medical Image Analysis, 2019 [6]
-
-### 2. STEERER (Density Map Regression)
-通过选择性继承学习（Selective Inheritance Learning）解决计数和定位中的尺度变化问题。
-*   **Reference**: Han et al., ICCV 2023 [4]
-
-### 3. PET (Point-query Quadtree)
-基于点查询四叉树的人群计数、定位方法，适用于密集细胞场景。
-*   **Reference**: Liu et al., ICCV 2023 [5]
-
-## 参考文献 (references)
-[1] Huang, Z., et al. (2020). Bc A large-scale dataset and benchmark for cell detection and counting. MICCAI.
-
-[2] Graham, S., et al. (2024). CoNIC Challenge: Pushing the frontiers of nuclear detection, segmentation, classification and counting. Medical Image Analysis.
-
-[3] Kumar, N., et al. (2019). A multi-organ nucleus segmentation challenge. IEEE TMI.
-
-[4] Graham, S., et al. (2019). HoVer-Net: Simultaneous segmentation and classification of nuclei in multi-tissue histology images. Medical Image Analysis.
-
-[5] Liu, C., et al. (2023). Point-Query Quadtree for Crowd Counting, Localization, and More. ICCV.
-
-[6] Han, T., et al. (2023). STEERER: Resolving scale variations for counting and localization via selective inheritance learning. ICCV.
-
-## 快速开始 (Quick Start)
-
-### 环境配置 (Installation)
+`data_conversion/convert_to_points.py` 将三种数据集统一为图像和 `N x 2` 中心点数组。内部坐标顺序为 `(y, x)`；跨方法 JSON 交换格式使用 `(x, y)`，详见 `data_conversion/coordinate_protocol.json`。
 
 ```bash
-# 克隆仓库
-git clone https://github.com/YourUsername/Pathology-Cell-Counting.git
-cd Pathology-Cell-Counting
+python data_conversion/convert_to_points.py --dataset bcdata \
+  --src_root /path/to/BCData --out_root data/BCData_points
 
-# 创建虚拟环境
-conda create -n path_cell python=3.8 （或许需要统一版本，避免环境不兼容）
-conda activate path_cell
+python data_conversion/convert_to_points.py --dataset conic \
+  --src_root /path/to/CoNIC --out_root data/CoNIC_points
 
-# 安装依赖
-pip install -r requirements.txt
+python data_conversion/convert_to_points.py --dataset monuseg \
+  --src_root /path/to/MoNuSeg --out_root data/MoNuSeg_points
+```
 
-## PET Baseline Added in This Repository
+共享的训练、验证和测试划分位于 `data_conversion/splits/`。各模型需要特殊张量、实例图或密度图时，其适配器保留在对应 baseline 内。
 
-This repository now includes the PET pathology-cell counting baseline adapted for
-BCData, CoNIC, and MoNuSeg.
+## 2. Baseline 复现模块
 
-Important PET files:
+| 方法 | 目录 | 方法类型 |
+| --- | --- | --- |
+| PET | `baselines/pet/` | 点监督定位匹配 |
+| STEERER | `baselines/steerer/` | 密度图回归 |
+| APGCC | `baselines/apgcc/` | 点监督定位匹配 |
+| HoVer-Net | `baselines/hovernet/` | 实例分割 |
+| CellVTA | `baselines/cellvta/` | 实例分割 |
 
-- `COURSE_PROJECT_README.md`: PET-specific course project notes, commands, and result table.
-- `prepare_cell_dataset.py`: conversion script for BCData, CoNIC, and MoNuSeg.
-- `main.py`: PET training entry.
-- `eval.py`: PET evaluation entry.
-- `engine.py`: training and evaluation loop with counting/localization metrics.
-- `datasets/`, `models/`, `util/`: PET data loading, model, and utility code.
-- `splits/`: shared split files used by PET experiments.
+各方法依赖的 PyTorch/CUDA 版本不同，请进入对应目录，按照该目录的 README 和 requirements/environment 文件创建独立环境。STEERER 与 HoVer-Net 的分支文件已归入统一 baseline 目录；其中 `steerer-dev` 是叠加包，运行前仍需补齐其 README 所列的上游 `lib/` 与 `lib_cls/` 核心依赖。
 
-Large local artifacts are intentionally not uploaded:
+## 3. 统一评价模块
 
-- `data/`
-- `outputs/`
-- `pretrained/`
-- model weights such as `*.pth`
+统一脚本基于预测中心点和 GT 中心点计算 MAE、MSE、RMSE、Precision、Recall 和 F1-score，并支持多个匹配距离阈值。
 
-Please see `COURSE_PROJECT_README.md` for the exact PET reproduction commands
-and the summarized PET results.
+```bash
+python evaluation/centroid_eval.py \
+  --gt path/to/gt.json \
+  --pred path/to/pred.json \
+  --thresholds 6 12 24
+```
+
+输入格式见 `evaluation/formats/predictions_json.md`。所有 baseline 的最终横向对比应使用该脚本和相同阈值。
+
+## 4. APGCC 改进模块
+
+| 方向 | 内容 | 代码位置 |
+| --- | --- | --- |
+| A | 阈值扫描与密度自适应校准 | `apgcc_improvements/directions/a_threshold_calibration/` |
+| B | 密集区域辅助监督 | `apgcc_improvements/directions/b_dense_auxiliary_supervision/` |
+| C | Adaptive NMS 与置信度校准 | `apgcc_improvements/directions/c_adaptive_nms/` |
+| D | DCNv2 与 Edge Ignore | `apgcc_improvements/directions/d_dcnv2_edge_ignore/` |
+| E | Stain Aug 与域感知阈值校准 | `apgcc_improvements/directions/e_stain_domain_calibration/` |
+
+可运行的组合版本位于 `apgcc_improvements/integrations/`：CoNIC 使用 A+D+E，MoNuSeg 使用 B+D+C，另保留 B+D 消融版本。
+
+## 数据与模型文件
+
+仓库只跟踪代码、小型评价结果、固定划分和复现文档。原始数据、转换后图像、checkpoint、预训练权重、TensorBoard 日志及大规模预测结果由 `.gitignore` 排除，需要在本地准备。
+
+## License
+
+项目级代码使用 [MIT License](LICENSE)。各 baseline 中的上游实现仍遵循其目录内的原始许可证。
