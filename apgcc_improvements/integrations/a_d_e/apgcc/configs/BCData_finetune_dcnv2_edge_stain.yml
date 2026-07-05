@@ -1,0 +1,108 @@
+# A + D + E combined recipe on BCData (mirrors CoNIC_finetune_dcnv2_edge_stain.yml)
+#   D : DCNv2 (conv5 last 2 layers) + Edge Ignore (band=16, weight=0.1)
+#   E : pathology / stain augmentation (train-only)
+#   A : EOS_COEF=0.10 + SET_COST_POINT(tau)=0.10 + FOCAL_GAMMA=2.0
+# NOTE: A's recipe was tuned on CoNIC; treat EOS/tau/gamma as a strong starting point and
+#       re-verify thresholds with density_threshold_val.py / scan_threshold.py on this base.
+TAG: 'APGCC_BCData_ADE_dcnv2_edge_stain'
+SEED: 1229
+GPU_ID: 2
+OUTPUT_DIR: './output/BCData_ADE_dcnv2_edge_stain/'
+VIS: False
+
+# -----------------------------------------------------------------------------
+# MODEL
+# -----------------------------------------------------------------------------
+MODEL:
+  ENCODER: 'vgg16_bn'
+  ENCODER_kwargs: {"last_pool": False}
+  DECODER: 'IFI'
+  DECODER_kwargs: {"num_classes": 2,
+                   "inner_planes": 64,
+                   "feat_layers":[3,4],
+                   "pos_dim": 32,
+                   "ultra_pe": True,
+                   "learn_pe": False,
+                   "unfold": False,
+                   "local": True,
+                   "no_aspp": False,
+                   "require_grad": True,
+                   "out_type": 'Normal',
+                   "head_layers":[1024,512,256,256]}
+
+  FROZEN_WEIGHTS: None
+
+  STRIDE: 8
+  ROW: 2
+  LINE: 2
+  POINT_LOSS_COEF: 0.0002
+  EOS_COEF: 0.10          # A: down-weight no-object class (was 0.5)
+  FOCAL_GAMMA: 2.0        # A: softmax-focal, easy-negative down-weighting
+
+  LOSS: ['L2']
+  WEIGHT_DICT: {'loss_ce': 1, 'loss_points': 0.0002, 'loss_aux': 0.}
+  AUX_EN: False
+  AUX_NUMBER: [2, 2]
+  AUX_RANGE: [2, 8]
+  AUX_kwargs: {'pos_coef': 1., 'neg_coef': 1., 'pos_loc': 0.0002, 'neg_loc': 0.0002}
+
+  DCNV2_ENABLED: True     # D
+  DCNV2_LAYERS: 2         # D
+  EDGE_BAND: 16           # D
+  EDGE_WEIGHT: 0.1        # D
+# Fine-tune from SHHA pretrained weights (load model weights only, not optimizer/epoch)
+RESUME: True
+RESUME_PATH: './output/SHHA_best.pth'
+FINETUNE: True
+
+# -----------------------------------------------------------------------------
+# Dataset
+# -----------------------------------------------------------------------------
+DATASETS:
+  DATASET: 'SHHA'
+  DATA_ROOT: '/data1/llx/BCData'
+  EVAL_LIST: 'val.list'    # select best.pth on val (A/E protocol: val selects, test reports once)
+
+# -----------------------------------------------------------------------------
+# DATALOADER
+# -----------------------------------------------------------------------------
+DATALOADER:
+  AUGUMENTATION: ['Normalize', 'Crop', 'Flip']
+  CROP_SIZE: 256
+  CROP_NUMBER: 4
+  UPPER_BOUNDER: 1024
+  NUM_WORKERS: 4
+  AUG_PROTOCOL: 'native'            # native base (E stain is layered on top)
+  PATHOLOGY_AUG: True               # E
+  STAIN_JITTER: True                # E
+  BLUR_NOISE: True                  # E
+
+# ---------------------------------------------------------------------------- #
+# Solver
+# ---------------------------------------------------------------------------- #
+SOLVER:
+  BATCH_SIZE: 8
+  START_EPOCH: 0
+  EPOCHS: 120
+  LR: 0.00005
+  LR_BACKBONE: 0.000005
+  WEIGHT_DECAY: 0.0001
+  LR_DROP: 800
+  CLIP_MAX_NORM: 0.1
+
+  EVAL_FREQ: 5
+  LOG_FREQ: 5
+
+# ---------------------------------------------------------------------------- #
+# Matcher
+# ---------------------------------------------------------------------------- #
+MATCHER:
+  SET_COST_CLASS: 1.
+  SET_COST_POINT: 0.10     # A: tau up (was 0.05)
+
+# -----------------------------------------------------------------------------
+# TEST
+# -----------------------------------------------------------------------------
+TEST:
+  THRESHOLD: 0.5
+  WEIGHT: './output/BCData_ADE_dcnv2_edge_stain/best.pth'

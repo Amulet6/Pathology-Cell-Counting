@@ -69,37 +69,38 @@ class Model_builder(nn.Module):
         decoder = build_decoder(**self.cfg.MODEL.DECODER_kwargs)
         return decoder
 
-    def forward(self, samples: NestedTensor):
+    def forward(self, samples: NestedTensor, targets=None):
         features = self.encoder(samples)
-        out = self.decoder(samples, features)       
-        return out   # {'pred_logits', 'pred_points', 'offset'}
+        out = self.decoder(samples, features, targets)
+        return out   # {'pred_logits', 'pred_points', 'offset', ('aux')}
 
 class SetCriterion_Crowd(nn.Module):
     # Copyright (C) 2021 THL A29 Limited, a Tencent company.  All rights reserved. 
-    def __init__(self, num_classes, matcher, weight_dict, eos_coef, aux_kwargs):
+    def __init__(self, num_classes, matcher, weight_dict, eos_coef, aux_kwargs, focal_gamma=0.0):
         """ Create the criterion.
         Parameters:
             num_classes: number of object categories, omitting the special no-object category
             matcher: module able to compute a matching between targets and proposals
             weight_dict: dict containing as key the names of the losses and as values their relative weight.
             eos_coef: relative classification weight applied to the no-object category
+            focal_gamma: softmax-focal modulation exponent on the proposal cls loss; 0.0 == plain weighted CE
         """
         super().__init__()
         self.num_classes = num_classes
         self.matcher = matcher
         self.weight_dict = weight_dict
         self.eos_coef = eos_coef
+        self.focal_gamma = focal_gamma
         empty_weight = torch.ones(self.num_classes + 1)
         empty_weight[0] = self.eos_coef
         self.register_buffer('empty_weight', empty_weight)
 
-        if 'loss_aux' in self.weight_dict:
-            self.aux_mode = False
-        else:
-            self.aux_mode = True
-            self.aux_number = aux_kwargs['AUX_NUMBER']
-            self.aux_range = aux_kwargs['AUX_RANGE']
-            self.aux_kwargs = aux_kwargs['AUX_kwargs']
+        self.aux_mode = 'loss_aux' in self.weight_dict
+        # aux_number/range/kwargs are needed by loss_auxiliary whenever loss_aux is active;
+        # always populate them (the original guarded this in a branch that never ran).
+        self.aux_number = aux_kwargs['AUX_NUMBER']
+        self.aux_range = aux_kwargs['AUX_RANGE']
+        self.aux_kwargs = aux_kwargs['AUX_kwargs']
 
     def loss_labels(self, outputs, targets, indices, num_points):
         """Classification loss (NLL)
@@ -114,7 +115,17 @@ class SetCriterion_Crowd(nn.Module):
         target_classes = torch.full(src_logits.shape[:2], 0,
                                     dtype=torch.int64, device=src_logits.device)
         target_classes[idx] = target_classes_o  # size=[batch*patch, num_queries] 0/1
-        loss_ce = F.cross_entropy(src_logits.transpose(1, 2), target_classes, self.empty_weight)
+        if self.focal_gamma and self.focal_gamma > 0:
+            # softmax-focal: -alpha_t * (1-p_t)^gamma * log(p_t), alpha = empty_weight per class.
+            # reduces EXACTLY to the weighted CE below when gamma == 0.
+            logp = F.log_softmax(src_logits, dim=-1)                       # [B, Q, 2]
+            logpt = logp.gather(-1, target_classes.unsqueeze(-1)).squeeze(-1)  # [B, Q]
+            pt = logpt.exp()
+            alpha = self.empty_weight[target_classes]                     # [B, Q]
+            focal = -alpha * ((1.0 - pt) ** self.focal_gamma) * logpt
+            loss_ce = focal.sum() / alpha.sum().clamp(min=1e-6)
+        else:
+            loss_ce = F.cross_entropy(src_logits.transpose(1, 2), target_classes, self.empty_weight)
         losses = {'loss_ce': loss_ce}
         return losses
 
@@ -211,9 +222,12 @@ class SetCriterion_Crowd(nn.Module):
             elif loss == 'loss_points':
                 losses.update(self.loss_points(output1, targets, indices1, num_boxes))
             elif loss == 'loss_aux':
-                out_auxs = output1['aux']
-                losses.update(self.loss_auxiliary(out_auxs, targets, show))
+                if outputs.get('aux', None) is not None:   # aux produced by decoder (training + AUX_EN)
+                    losses.update(self.loss_auxiliary(outputs['aux'], targets, show))
+                else:
+                    losses['loss_aux'] = output1['pred_logits'].sum() * 0.0  # keep key, no contribution
             else:
                 raise KeyError('do you really want to compute {} loss?'.format(loss))
-        print(losses)
+        if show:
+            print(losses)
         return losses

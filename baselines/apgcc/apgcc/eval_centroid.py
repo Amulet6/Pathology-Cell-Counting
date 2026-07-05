@@ -34,6 +34,8 @@ def main():
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--thresholds", type=int, nargs="+", default=[6, 12, 24],
                     help="distance thresholds (px) for localization P/R/F1")
+    ap.add_argument("--subset-by", choices=["prefix"], default=None,
+                    help="pass through to centroid_eval.py for per-subset breakdown")
     args = ap.parse_args()
 
     os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu)
@@ -85,6 +87,8 @@ def main():
     repo_eval = Path(__file__).resolve().parents[3] / "evaluation" / "centroid_eval.py"
     cmd = [sys.executable, str(repo_eval), "--gt", str(gt_json), "--pred", str(pred_json),
            "--thresholds", *map(str, args.thresholds)]
+    if args.subset_by:
+        cmd += ["--subset-by", args.subset_by]
     subprocess.run(cmd, check=True)
 
 

@@ -91,7 +91,7 @@ class Basic_Decoder_Model(nn.Module):
         if self.aux_en:
             raise NotImplemented
 
-    def forward(self, samples, features):
+    def forward(self, samples, features, targets=None):
         # forward the feature pyramid
         batch_size = features[0].shape[0]
         # FPN will output different deep feature according to feat_layers; P5_x:/16(256), P4_x:/8(256), P3_x:/4(256), P2_x:/2(256)
@@ -225,11 +225,44 @@ class IFI_Decoder_Model(nn.Module):
         anchor_points = self.anchor_points(samples).repeat(batch_size, 1, 1)   # get sample point map
         output_coord = offset + anchor_points   # [b, h/d*w/d*line*row, 2(x,y)]  # transfer feature coordinate moving to image coordinate. (correspond to head center)
         output_confid = confidence              # [b, h/d*w/d*line*row, 2(confidence)]
-        out = {'pred_logits': output_confid, 'pred_points': output_coord, 'offset': offset} 
+        out = {'pred_logits': output_confid, 'pred_points': output_coord, 'offset': offset}
 
-        if not self.aux_en or not self.training:
+        if not self.aux_en or not self.training or targets is None:
             return out
+        # APG (Auxiliary Point Guidance) - our reimplementation (official training code unreleased).
+        # Around each GT: the npos nearest grid anchors get a positive auxiliary loss
+        # (classify foreground + regress predicted point to the GT); anchors far from all
+        # GTs get a negative auxiliary loss (classify background + push offset to 0).
+        out['aux'] = self._build_aux(samples, output_coord, output_confid, offset, targets)
+        return out
+
+    def _build_aux(self, samples, coords, confids, offsets, targets,
+                   npos=4, neg_per_gt=4, neg_min_dist=16.0):
+        anchors = self.anchor_points(samples)[0]
+        pos_pts, pos_lg, neg_off, neg_lg = [], [], [], []
+        for i, t in enumerate(targets):
+            gt = t['point']
+            if gt.numel() == 0:
+                continue
+            D = torch.cdist(anchors, gt)
+            k = min(npos, anchors.shape[0])
+            for j in range(gt.shape[0]):
+                idx = torch.topk(D[:, j], k, largest=False).indices
+                pos_pts.append(coords[i][idx])
+                pos_lg.append(confids[i][idx])
+            far = torch.where(D.min(1).values > neg_min_dist)[0]
+            if far.numel() > 0:
+                m = min(neg_per_gt * gt.shape[0], far.numel())
+                sel = far[torch.randperm(far.numel(), device=far.device)[:m]]
+                neg_off.append(offsets[i][sel])
+                neg_lg.append(confids[i][sel])
+        if len(pos_pts) == 0:
+            return None
+        pp, pl = torch.cat(pos_pts).unsqueeze(0), torch.cat(pos_lg).unsqueeze(0)
+        pos0 = {'pred_points': pp, 'pred_logits': pl, 'offset': pp}
+        if len(neg_off) > 0:
+            no, nl = torch.cat(neg_off).unsqueeze(0), torch.cat(neg_lg).unsqueeze(0)
         else:
-            raise NotImplemented                # still refinement, will be announced ASAP
-            out['aux'] = None
-            return out
+            no, nl = offsets[0][:1].unsqueeze(0), confids[0][:1].unsqueeze(0)
+        neg0 = {'offset': no, 'pred_logits': nl, 'pred_points': no}
+        return {'pos0': pos0, 'neg0': neg0}

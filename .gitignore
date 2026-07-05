@@ -325,6 +325,13 @@ requirements.local.bak
 **/.vscode/
 *.tfevents.*
 baselines/*/output/
+baselines/*/apgcc/output/
+apgcc_improvements/directions/*/apgcc/output/
+apgcc_improvements/integrations/*/apgcc/output/*
+!apgcc_improvements/integrations/*/apgcc/output/.gitkeep
+improved/*/apgcc/output/*
+!improved/*/apgcc/output/.gitkeep
+.claude/settings.local.json
 
 # Allow the missing STEERER core to be added in a future branch update.
 !baselines/steerer/lib/

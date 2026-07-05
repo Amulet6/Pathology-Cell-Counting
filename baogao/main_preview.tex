@@ -1,0 +1,26 @@
+% 最小预览主文档: 单独编译 baseline 这一节.
+% 编译(含中文): xelatex main_preview.tex   (需 ctex; TeXLive/MacTeX 自带)
+\documentclass[11pt]{ctexart}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[margin=1in]{geometry}
+\graphicspath{{figures/}}
+% optimization_results.tex / integration_results.tex 用到的左对齐 X 列
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\begin{document}
+% 占位的上级标题, 仅为让 \subsubsection 正常显示
+\section*{baseline 复现}
+\input{baseline_apgcc.tex}
+
+\section*{困难样本诊断与各方向改进}
+\input{optimization_results.tex}
+
+\section*{多方向集成改进}
+\input{integration_results.tex}
+\end{document}

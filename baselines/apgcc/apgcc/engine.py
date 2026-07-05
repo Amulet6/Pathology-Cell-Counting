@@ -72,7 +72,25 @@ class Trainer(object):
             checkpoint = torch.load(self.cfg.RESUME_PATH, map_location='cpu')
             # support both {'model': state_dict} and bare state_dict formats
             state_dict = checkpoint['model'] if isinstance(checkpoint, dict) and 'model' in checkpoint else checkpoint
-            self.model_without_ddp.load_state_dict(state_dict)
+            if self.cfg.get('FINETUNE', False):
+                model_dict = self.model_without_ddp.state_dict()
+                compatible = {
+                    k: v for k, v in state_dict.items()
+                    if k in model_dict and tuple(v.shape) == tuple(model_dict[k].shape)
+                }
+                skipped = [
+                    k for k, v in state_dict.items()
+                    if k in model_dict and tuple(v.shape) != tuple(model_dict[k].shape)
+                ]
+                model_dict.update(compatible)
+                self.model_without_ddp.load_state_dict(model_dict)
+                if skipped:
+                    self.logger.info(
+                        'Skipped %d shape-mismatched finetune weights: %s',
+                        len(skipped), ', '.join(skipped[:12])
+                    )
+            else:
+                self.model_without_ddp.load_state_dict(state_dict)
             # restore optimizer/epoch only when resuming (not fine-tuning from another domain)
             if not self.cfg.get('FINETUNE', False) and isinstance(checkpoint, dict) and \
                     'optimizer' in checkpoint and 'lr_scheduler' in checkpoint and 'epoch' in checkpoint:
@@ -140,8 +158,8 @@ class Trainer(object):
         samples, targets = batch
         samples = samples.to(device)
         targets = [{k: v.to(device) if k!='name' else v for k, v in t.items()} for t in targets]
-        # forward
-        outputs = self.model(samples)
+        # forward (pass targets so the decoder can build APG auxiliary outputs when AUX_EN)
+        outputs = self.model(samples, targets)
 
         # calc the losses
         loss_dict = self.criterion(outputs, targets, self.batch_cnt == 30)

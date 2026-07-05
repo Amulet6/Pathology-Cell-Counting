@@ -51,6 +51,7 @@ _C.MODEL.FROZEN_WEIGHTS = None 	# frozen_weights, Path to the pretrained model. 
 # mixed to the unity loss kwargs
 _C.MODEL.POINT_LOSS_COEF = 0.0002 # point_loss_coef
 _C.MODEL.EOS_COEF = 0.5 # eos_coef, Relative classification weight of the no-object class
+_C.MODEL.FOCAL_GAMMA = 0.0 # softmax-focal modulation on proposal cls loss; 0.0 == plain weighted CE
 
 _C.MODEL.LOSS = ['L2']
 _C.MODEL.WEIGHT_DICT = {'loss_ce': 1, 'loss_points': 0., 'loss_aux': 0.} 

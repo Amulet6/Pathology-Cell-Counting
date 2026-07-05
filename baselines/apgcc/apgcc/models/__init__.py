@@ -14,6 +14,7 @@ def build_model(cfg, training):
    criterion = SetCriterion_Crowd(num_classes=1, \
                                   matcher=matcher, weight_dict=weight_dict, \
                                   eos_coef=cfg.MODEL.EOS_COEF, \
+                                  focal_gamma=cfg.MODEL.FOCAL_GAMMA, \
                                   aux_kwargs = {'AUX_NUMBER': cfg.MODEL.AUX_NUMBER,
                                                 'AUX_RANGE': cfg.MODEL.AUX_RANGE, 
                                                 'AUX_kwargs': cfg.MODEL.AUX_kwargs})
