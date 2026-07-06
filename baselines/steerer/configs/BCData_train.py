@@ -1,3 +1,8 @@
+# Pathology adaptation of the official HRNet-W48 STEERER configuration.
+# Point annotations are converted to Gaussian density supervision at load time.
+# Paths are relative to baselines/steerer; adjust them before a new machine run.
+# Keep train/test resize and point-evaluation coordinates in the same system.
+
 gpus = (0,)
 log_dir = 'exp'
 workers = 4
@@ -73,7 +78,7 @@ train = dict(
     end_epoch=100,
     extra_epoch=0,
     extra_lr=0,
-    resume_path='exp/SHHB/MocHRBackbone_hrnet48/BCData_train_2026-05-24-13-21',
+    resume_path=None,  # Set a path only when resuming training.
     flip=True,
     multi_scale=True,
     scale_factor=(0.5, 1.0 / 0.5),

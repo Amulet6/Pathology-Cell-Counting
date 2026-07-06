@@ -14,3 +14,14 @@ __pycache__/
 *.log
 events.out.tfevents.*
 scale_statistic.json
+data/
+ProcessedData/
+PretrainedModels/
+checkpoints/
+*.pyo
+*.swp
+*.swo
+*.bak*
+.DS_Store
+lib/models/backbones/hrnet/moc_backbone_bak.py
+lib/models/backbones/maevit/vitdet(1).py

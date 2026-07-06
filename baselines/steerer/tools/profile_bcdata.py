@@ -1,3 +1,9 @@
+"""Measure STEERER parameters, FLOPs and synchronized forward latency.
+
+Synthetic input isolates model inference from data I/O and point post-processing.
+The historical filename mentions BCData, but any compatible config is accepted.
+"""
+
 import argparse
 import time
 import torch
@@ -9,7 +15,7 @@ from lib.models.build_counter import Baseline_Counter
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Profile a trained STEERER model.")
     parser.add_argument("--cfg", default="configs/BCData_train.py")
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--height", type=int, default=640)
@@ -26,6 +32,7 @@ def main():
         route_size=config.train.route_size,
         device=device,
     )
+    # Accept raw, wrapped and DistributedDataParallel checkpoint formats.
     state = torch.load(args.checkpoint, map_location="cpu")
     if isinstance(state, dict) and "state_dict" in state:
         state = state["state_dict"]
@@ -33,6 +40,7 @@ def main():
     model.load_state_dict(state, strict=False)
     model.to(device).eval()
 
+    # Batch size one matches the cross-baseline efficiency protocol.
     x = torch.randn(1, 3, args.height, args.width).to(device)
 
     print("Parameter count:")
@@ -46,6 +54,8 @@ def main():
         print("FLOPs calculation failed:", repr(exc))
 
     with torch.no_grad():
+        # Warm-up excludes CUDA initialization; synchronization below is
+        # required because GPU kernels otherwise launch asynchronously.
         for _ in range(args.warmup):
             model(x)
         if device.type == "cuda":
