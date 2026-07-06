@@ -292,3 +292,7 @@ config_local.py
 .local.env
 *.key
 *.token
+
+# STEERER keeps its upstream Python package in baselines/steerer/lib.
+# The generic virtualenv rule above must not hide this application source.
+!baselines/steerer/lib/

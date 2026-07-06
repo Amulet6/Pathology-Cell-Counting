@@ -1,9 +1,10 @@
 mmcv==1.6.0
 tqdm
 scipy
-timm 
+timm
 einops
 dict_recursive_update
 yacs>=0.1.5
 tensorboardX==2.6.2
 fvcore
+h5py

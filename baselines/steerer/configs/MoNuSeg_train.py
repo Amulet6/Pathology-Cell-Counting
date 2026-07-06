@@ -1,3 +1,8 @@
+# Pathology adaptation of the official HRNet-W48 STEERER configuration.
+# Point annotations are converted to Gaussian density supervision at load time.
+# Paths are relative to baselines/steerer; adjust them before a new machine run.
+# Keep train/test resize and point-evaluation coordinates in the same system.
+
 gpus = (0,)
 log_dir = 'exp'
 workers = 4
