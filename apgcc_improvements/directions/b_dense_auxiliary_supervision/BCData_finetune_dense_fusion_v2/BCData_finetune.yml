@@ -1,0 +1,106 @@
+TAG: 'APGCC_BCData_finetune'
+SEED: 1229
+GPU_ID: 3
+OUTPUT_DIR: './output/BCData_finetune/'
+VIS: False
+
+# -----------------------------------------------------------------------------
+# MODEL
+# -----------------------------------------------------------------------------
+MODEL:
+  ENCODER: 'vgg16_bn'
+  ENCODER_kwargs: {"last_pool": False}
+  DECODER: 'IFI'
+  DECODER_kwargs: {"num_classes": 2,
+                   "inner_planes": 64,
+                   "feat_layers":[3,4],
+                   "pos_dim": 32,
+                   "ultra_pe": True,
+                   "learn_pe": False,
+                   "unfold": False,
+                   "local": True,
+                   "no_aspp": False,
+                   "require_grad": True,
+                   "out_type": 'Normal',
+                   "head_layers":[1024,512,256,256]}
+
+  FROZEN_WEIGHTS: None
+
+  STRIDE: 8
+  ROW: 2
+  LINE: 2
+  POINT_LOSS_COEF: 0.0002
+  EOS_COEF: 0.5
+
+  LOSS: ['L2']
+  WEIGHT_DICT: {'loss_ce': 1, 'loss_points': 0.0002, 'loss_aux': 0., 'loss_dense': 0.1}
+  AUX_EN: False
+  DENSE_AUX_EN: True
+  DENSE_AUX_LEVEL: 3
+  DENSE_SIGMA: 2.0
+  DENSE_FUSION_EN: True
+  DENSE_FUSION_THRESHOLD: 0.35
+  DENSE_FUSION_RADIUS: 6.0
+  DENSE_FUSION_KERNEL: 5
+  DENSE_FUSION_TOPK: 256
+  DENSE_FUSION_MAX_ADD: 48
+  DENSE_FUSION_LOW_CONF: 0.20
+  DENSE_FUSION_CANDIDATE_DENSE: 0.60
+  DENSE_FUSION_CANDIDATE_TOPK: 32
+  DENSE_FUSION_RAW_MAX_ADD: 0
+  AUX_NUMBER: [2, 2]
+  AUX_RANGE: [2, 8]
+  AUX_kwargs: {'pos_coef': 1., 'neg_coef': 1., 'pos_loc': 0.0002, 'neg_loc': 0.0002}
+
+# 从 SHHA 官方权重初始化，仅加载模型权重（不恢复 optimizer/epoch）
+RESUME: True
+RESUME_PATH: './output/SHHA_best.pth'
+FINETUNE: True
+
+# -----------------------------------------------------------------------------
+# Dataset
+# -----------------------------------------------------------------------------
+DATASETS:
+  DATASET: 'SHHA'                         # 沿用 SHHA 的 DataLoader 逻辑
+  DATA_ROOT: '/mnt/data1/llx/BCData'
+  EVAL_LIST: 'val.list'
+
+# -----------------------------------------------------------------------------
+# DATALOADER
+# -----------------------------------------------------------------------------
+DATALOADER:
+  AUGUMENTATION: ['Normalize', 'Crop', 'Flip']
+  CROP_SIZE: 256      # 细胞图像 640x640，裁剪块稍大
+  CROP_NUMBER: 4
+  UPPER_BOUNDER: 1024
+  NUM_WORKERS: 4
+
+# ---------------------------------------------------------------------------- #
+# Solver
+# ---------------------------------------------------------------------------- #
+SOLVER:
+  BATCH_SIZE: 8
+  START_EPOCH: 0
+  EPOCHS: 200       # 微调不需要像从头训练的 3500 epoch
+  LR: 0.00005        # 微调用更小的学习率
+  LR_BACKBONE: 0.000005
+  WEIGHT_DECAY: 0.0001
+  LR_DROP: 800
+  CLIP_MAX_NORM: 0.1
+
+  EVAL_FREQ: 5
+  LOG_FREQ: 5
+
+# ---------------------------------------------------------------------------- #
+# Matcher
+# ---------------------------------------------------------------------------- #
+MATCHER:
+  SET_COST_CLASS: 1.
+  SET_COST_POINT: 0.05
+
+# -----------------------------------------------------------------------------
+# TEST
+# -----------------------------------------------------------------------------
+TEST:
+  THRESHOLD: 0.5
+  WEIGHT: './output/BCData_finetune/best_mae.pth'

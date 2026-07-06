@@ -1,0 +1,23 @@
+2026-06-08 21:25:18,426 AGPCC INFO: Using 1 GPUS
+2026-06-08 21:25:18,426 AGPCC INFO: Running with config:
+{'TAG': 'APGCC_SHHA', 'SEED': 1229, 'GPU_ID': 0, 'OUTPUT_DIR': './output/', 'VIS': False, 'MODEL': {'ENCODER': 'vgg16_bn', 'ENCODER_kwargs': {'last_pool': False}, 'DECODER': 'IFI', 'DECODER_kwargs': {'num_classes': 2, 'inner_planes': 64, 'feat_layers': [3, 4], 'pos_dim': 32, 'ultra_pe': True, 'learn_pe': False, 'unfold': False, 'local': True, 'no_aspp': False, 'require_grad': True, 'out_type': 'Normal', 'head_layers': [1024, 512, 256, 256]}, 'STRIDE': 8, 'ROW': 2, 'LINE': 2, 'FROZEN_WEIGHTS': None, 'POINT_LOSS_COEF': 0.0002, 'EOS_COEF': 0.5, 'LOSS': ['L2'], 'WEIGHT_DICT': {'loss_ce': 1, 'loss_points': 0.0002, 'loss_aux': 0.2}, 'AUX_EN': True, 'AUX_NUMBER': [2, 2], 'AUX_RANGE': [2, 8], 'AUX_kwargs': {'pos_coef': 1.0, 'neg_coef': 1.0, 'pos_loc': 0.0002, 'neg_loc': 0.0002}}, 'RESUME': False, 'RESUME_PATH': '', 'FINETUNE': False, 'DATASETS': {'DATASET': 'SHHA', 'DATA_ROOT': '/data1/llx/part_A_apgcc'}, 'DATALOADER': {'AUGUMENTATION': ['Normalize', 'Crop', 'Flip'], 'CROP_SIZE': 128, 'CROP_NUMBER': 4, 'UPPER_BOUNDER': -1, 'NUM_WORKERS': 0}, 'SOLVER': {'BATCH_SIZE': 8, 'START_EPOCH': 0, 'EPOCHS': 3500, 'LR': 0.0001, 'LR_BACKBONE': 1e-05, 'WEIGHT_DECAY': 0.0001, 'LR_DROP': 3500, 'CLIP_MAX_NORM': 0.1, 'EVAL_FREQ': 1, 'LOG_FREQ': 1}, 'MATCHER': {'SET_COST_CLASS': 1.0, 'SET_COST_POINT': 0.05}, 'TEST': {'THRESHOLD': 0.5, 'WEIGHT': './output/SHHA_best.pth'}, 'config_file': './configs/SHHA_test.yml', 'test': True}
+2026-06-08 21:25:18,426 AGPCC INFO: ##############################################################
+2026-06-08 21:25:18,426 AGPCC INFO: # % TEST .....  
+2026-06-08 21:25:18,426 AGPCC INFO: # Config is {./configs/SHHA_test.yml}
+2026-06-08 21:25:18,426 AGPCC INFO: # SEED is {1229}
+2026-06-08 21:25:18,426 AGPCC INFO: # DATASET is {SHHA}
+2026-06-08 21:25:18,426 AGPCC INFO: # DATA_RT is {/data1/llx/part_A_apgcc}
+2026-06-08 21:25:18,426 AGPCC INFO: # MODEL.ENCODER is {vgg16_bn}
+2026-06-08 21:25:18,426 AGPCC INFO: # MODEL.DECODER is {IFI}
+2026-06-08 21:25:18,426 AGPCC INFO: # RESUME is {False}
+2026-06-08 21:25:18,426 AGPCC INFO: # BATCH is {8*2*2}
+2026-06-08 21:25:18,426 AGPCC INFO: # OUTPUT_DIR is {./output/}
+2026-06-08 21:25:18,426 AGPCC INFO: # RESULT_DIR is {./output/SHHA_0.50}
+2026-06-08 21:25:18,426 AGPCC INFO: ##############################################################
+2026-06-08 21:25:18,426 AGPCC INFO: Eval Log Mon Jun  8 21:25:18 2026
+2026-06-08 21:25:20,094 AGPCC INFO: number of params:17750480 
+
+2026-06-08 21:25:38,197 AGPCC INFO: Eval: MAE=48.725275, MSE=76.739892 time:18.00s
+2026-06-08 21:25:38,198 AGPCC INFO: Localization (σ=4): Prec=0.4387  Recall=0.4279  F1=0.4332
+2026-06-08 21:25:38,198 AGPCC INFO: Localization (σ=8): Prec=0.7732  Recall=0.7541  F1=0.7635
+

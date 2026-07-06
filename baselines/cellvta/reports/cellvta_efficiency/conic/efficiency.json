@@ -1,0 +1,17 @@
+{
+  "dataset": "conic",
+  "run_dir": "/data/zju-151/liyixin/project/project/pathology-cell-counting/repos/CellVTA/logs/2026-06-10T162619_CellVTA_Conic_40x",
+  "checkpoint": "/data/zju-151/liyixin/project/project/pathology-cell-counting/repos/CellVTA/logs/2026-06-10T162619_CellVTA_Conic_40x/checkpoints/model_best.pth",
+  "params_M": 387.751052,
+  "flops_G": 732.296716,
+  "flops_source": "torch_profiler",
+  "latency_ms": 61.70967,
+  "latency_std": 0.810352,
+  "gpu_model": "NVIDIA GeForce RTX 3090",
+  "pytorch_ver": "2.0.0+cu118",
+  "cuda_ver": "11.8",
+  "batch_size": 1,
+  "input_size": 256,
+  "warmup": 10,
+  "iters": 100
+}

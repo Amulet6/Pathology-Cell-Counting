@@ -1,0 +1,83 @@
+TAG: 'APGCC_CoNIC_finetune_grl'
+SEED: 1229
+GPU_ID: 0
+OUTPUT_DIR: './output/CoNIC_finetune_grl/'
+VIS: False
+
+MODEL:
+  ENCODER: 'vgg16_bn'
+  ENCODER_kwargs: {"last_pool": False}
+  DECODER: 'IFI'
+  DECODER_kwargs: {"num_classes": 2,
+                   "inner_planes": 64,
+                   "feat_layers":[3,4],
+                   "pos_dim": 32,
+                   "ultra_pe": True,
+                   "learn_pe": False,
+                   "unfold": False,
+                   "local": True,
+                   "no_aspp": False,
+                   "require_grad": True,
+                   "out_type": 'Normal',
+                   "head_layers":[1024,512,256,256]}
+  FROZEN_WEIGHTS: None
+  STRIDE: 8
+  ROW: 2
+  LINE: 2
+  POINT_LOSS_COEF: 0.0002
+  EOS_COEF: 0.5
+  LOSS: ['L2']
+  WEIGHT_DICT: {'loss_ce': 1, 'loss_points': 0.0002, 'loss_aux': 0.}
+  AUX_EN: False
+  AUX_NUMBER: [2, 2]
+  AUX_RANGE: [2, 8]
+  AUX_kwargs: {'pos_coef': 1., 'neg_coef': 1., 'pos_loc': 0.0002, 'neg_loc': 0.0002}
+  DOMAIN_ADAPTATION: True
+  DOMAIN_LOSS_WEIGHT: 0.01
+  DOMAIN_NUM_CLASSES: 5
+  DOMAIN_GRL_LAMBDA: 1.0
+  DOMAIN_HIDDEN_DIM: 256
+
+RESUME: True
+RESUME_PATH: './output/SHHA_best.pth'
+FINETUNE: True
+
+DATASETS:
+  DATASET: 'SHHA'
+  DATA_ROOT: '/root/autodl-tmp/steerer_project/ProcessedData/CoNIC_APGCC_seed19'
+  EVAL_LIST: 'val.list'
+
+DATALOADER:
+  AUGUMENTATION: ['Normalize', 'Crop', 'Flip']
+  CROP_SIZE: 128
+  CROP_NUMBER: 4
+  UPPER_BOUNDER: -1
+  NUM_WORKERS: 8
+  AUG_PROTOCOL: 'native'
+  PATHOLOGY_AUG: False
+  STAIN_JITTER: False
+  BLUR_NOISE: False
+  DOMAIN_NAMES: ['crag', 'dpath', 'glas', 'pannuke', 'consep']
+
+SOLVER:
+  BATCH_SIZE: 16
+  START_EPOCH: 0
+  EPOCHS: 80
+  LR: 0.00005
+  LR_BACKBONE: 0.000005
+  WEIGHT_DECAY: 0.0001
+  LR_DROP: 800
+  CLIP_MAX_NORM: 0.1
+
+  EVAL_FREQ: 5
+  LOG_FREQ: 5
+  EARLY_STOP_PATIENCE: 4
+  EARLY_STOP_MIN_DELTA: 0.01
+
+MATCHER:
+  SET_COST_CLASS: 1.
+  SET_COST_POINT: 0.05
+
+TEST:
+  THRESHOLD: 0.5
+  WEIGHT: './output/CoNIC_finetune_grl/best.pth'

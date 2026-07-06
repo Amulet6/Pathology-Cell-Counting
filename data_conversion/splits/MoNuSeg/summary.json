@@ -1,0 +1,15 @@
+{
+  "dataset": "MoNuSeg",
+  "source": "data\\MoNuSeg_pet",
+  "mode": "export_pet",
+  "splits": {
+    "train": {
+      "count": 30,
+      "sha1": "5d25fcdd9a549a8f3441165cf58ecfe487fc2b18"
+    },
+    "val": {
+      "count": 7,
+      "sha1": "6c86eeaeea222eef14ceb0fd43e770cfe0988f7a"
+    }
+  }
+}

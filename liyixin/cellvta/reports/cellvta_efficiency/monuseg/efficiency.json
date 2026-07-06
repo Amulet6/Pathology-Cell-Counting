@@ -1,0 +1,17 @@
+{
+  "dataset": "monuseg",
+  "run_dir": "/data/zju-151/liyixin/project/project/pathology-cell-counting/repos/CellVTA/logs/2026-06-13T180749_CellVTA_MoNuSeg_unified_aug",
+  "checkpoint": "/data/zju-151/liyixin/project/project/pathology-cell-counting/repos/CellVTA/logs/2026-06-13T180749_CellVTA_MoNuSeg_unified_aug/checkpoints/model_best.pth",
+  "params_M": 387.750727,
+  "flops_G": 732.254773,
+  "flops_source": "torch_profiler",
+  "latency_ms": 61.884469,
+  "latency_std": 0.598163,
+  "gpu_model": "NVIDIA GeForce RTX 3090",
+  "pytorch_ver": "2.0.0+cu118",
+  "cuda_ver": "11.8",
+  "batch_size": 1,
+  "input_size": 256,
+  "warmup": 10,
+  "iters": 100
+}

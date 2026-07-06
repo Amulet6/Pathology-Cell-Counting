@@ -1,0 +1,8 @@
+id,image,points
+TCGA-50-5931-01Z-00-DX1,val/images/monuseg_00005_TCGA-50-5931-01Z-00-DX1.png,val/points/monuseg_00005_TCGA-50-5931-01Z-00-DX1.npy
+TCGA-AR-A1AS-01Z-00-DX1,val/images/monuseg_00009_TCGA-AR-A1AS-01Z-00-DX1.png,val/points/monuseg_00009_TCGA-AR-A1AS-01Z-00-DX1.npy
+TCGA-B0-5710-01Z-00-DX1,val/images/monuseg_00012_TCGA-B0-5710-01Z-00-DX1.png,val/points/monuseg_00012_TCGA-B0-5710-01Z-00-DX1.npy
+TCGA-FG-A87N-01Z-00-DX1,val/images/monuseg_00020_TCGA-FG-A87N-01Z-00-DX1.png,val/points/monuseg_00020_TCGA-FG-A87N-01Z-00-DX1.npy
+TCGA-G9-6336-01Z-00-DX1,val/images/monuseg_00022_TCGA-G9-6336-01Z-00-DX1.png,val/points/monuseg_00022_TCGA-G9-6336-01Z-00-DX1.npy
+TCGA-G9-6363-01Z-00-DX1,val/images/monuseg_00026_TCGA-G9-6363-01Z-00-DX1.png,val/points/monuseg_00026_TCGA-G9-6363-01Z-00-DX1.npy
+TCGA-HE-7128-01Z-00-DX1,val/images/monuseg_00027_TCGA-HE-7128-01Z-00-DX1.png,val/points/monuseg_00027_TCGA-HE-7128-01Z-00-DX1.npy

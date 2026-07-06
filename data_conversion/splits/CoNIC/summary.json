@@ -1,0 +1,15 @@
+{
+  "dataset": "CoNIC",
+  "source": "data\\CoNIC_pet",
+  "mode": "export_pet",
+  "splits": {
+    "train": {
+      "count": 3985,
+      "sha1": "339cd79bed189ffe2722ba1da43f71e5fec9c43b"
+    },
+    "val": {
+      "count": 996,
+      "sha1": "5cae3aa7068ae66dc62074f9230fe3e3070d5029"
+    }
+  }
+}
